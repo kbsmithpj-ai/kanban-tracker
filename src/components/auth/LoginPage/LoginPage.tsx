@@ -1,34 +1,51 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { Input, Button } from '../../common';
 import styles from './LoginPage.module.css';
 
-type AuthMode = 'login' | 'signup' | 'forgot-password';
+type AuthMode = 'login' | 'signup' | 'forgot-password' | 'reset-password';
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export function LoginPage() {
-  const { signIn, signUp, resetPassword } = useAuth();
+  const { signIn, signUp, resetPassword, updatePassword, isRecoveryMode, clearRecoveryMode } = useAuth();
 
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // When recovery mode is detected, switch to reset-password mode
+  useEffect(() => {
+    if (isRecoveryMode) {
+      setMode('reset-password');
+      setError(null);
+      setSuccess(null);
+    }
+  }, [isRecoveryMode]);
+
   const clearForm = useCallback(() => {
     setEmail('');
     setPassword('');
+    setConfirmPassword('');
     setName('');
     setError(null);
     setSuccess(null);
   }, []);
 
   const handleModeChange = useCallback((newMode: AuthMode) => {
+    // If leaving reset-password mode, clear recovery mode
+    if (mode === 'reset-password' && newMode !== 'reset-password') {
+      clearRecoveryMode();
+    }
     clearForm();
     setMode(newMode);
-  }, [clearForm]);
+  }, [clearForm, mode, clearRecoveryMode]);
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
@@ -61,13 +78,36 @@ export function LoginPage() {
         } else {
           setSuccess('Password reset email sent. Please check your inbox.');
         }
+      } else if (mode === 'reset-password') {
+        // Validate password length
+        if (password.length < MIN_PASSWORD_LENGTH) {
+          setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters long`);
+          setIsSubmitting(false);
+          return;
+        }
+        // Validate passwords match
+        if (password !== confirmPassword) {
+          setError('Passwords do not match');
+          setIsSubmitting(false);
+          return;
+        }
+        const result = await updatePassword(password);
+        if (result.error) {
+          setError(result.error.message);
+        } else {
+          setSuccess('Password updated successfully! You can now sign in with your new password.');
+          // Clear form and switch to login mode after a brief delay
+          setTimeout(() => {
+            handleModeChange('login');
+          }, 2000);
+        }
       }
     } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
-  }, [mode, email, password, name, signIn, signUp, resetPassword]);
+  }, [mode, email, password, confirmPassword, name, signIn, signUp, resetPassword, updatePassword, handleModeChange]);
 
   const getTitle = () => {
     switch (mode) {
@@ -77,6 +117,8 @@ export function LoginPage() {
         return 'Create Account';
       case 'forgot-password':
         return 'Reset Password';
+      case 'reset-password':
+        return 'Set New Password';
     }
   };
 
@@ -91,6 +133,8 @@ export function LoginPage() {
         return 'Create Account';
       case 'forgot-password':
         return 'Send Reset Link';
+      case 'reset-password':
+        return 'Update Password';
     }
   };
 
@@ -115,17 +159,47 @@ export function LoginPage() {
             />
           )}
 
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-            autoComplete="email"
-          />
+          {mode !== 'reset-password' && (
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              autoComplete="email"
+            />
+          )}
 
-          {mode !== 'forgot-password' && (
+          {mode === 'reset-password' && (
+            <>
+              <p className={styles.resetPasswordHint}>
+                Enter your new password below. Password must be at least {MIN_PASSWORD_LENGTH} characters long.
+              </p>
+              <Input
+                label="New Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter new password"
+                required
+                autoComplete="new-password"
+                minLength={MIN_PASSWORD_LENGTH}
+              />
+              <Input
+                label="Confirm Password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                required
+                autoComplete="new-password"
+                minLength={MIN_PASSWORD_LENGTH}
+              />
+            </>
+          )}
+
+          {(mode === 'login' || mode === 'signup') && (
             <Input
               label="Password"
               type="password"
@@ -203,6 +277,19 @@ export function LoginPage() {
           {mode === 'forgot-password' && (
             <div className={styles.footerText}>
               Remember your password?{' '}
+              <button
+                type="button"
+                className={styles.link}
+                onClick={() => handleModeChange('login')}
+              >
+                Back to sign in
+              </button>
+            </div>
+          )}
+
+          {mode === 'reset-password' && (
+            <div className={styles.footerText}>
+              Changed your mind?{' '}
               <button
                 type="button"
                 className={styles.link}

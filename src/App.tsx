@@ -52,13 +52,14 @@ function AppLayout() {
 }
 
 function AuthenticatedApp() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isRecoveryMode } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
-  if (!isAuthenticated) {
+  // Show LoginPage for password reset even if authenticated (recovery token creates a session)
+  if (!isAuthenticated || isRecoveryMode) {
     return <LoginPage />;
   }
 

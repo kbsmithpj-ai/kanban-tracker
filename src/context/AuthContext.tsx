@@ -54,10 +54,13 @@ interface AuthContextValue {
   isAdmin: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isRecoveryMode: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, name: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<AuthResult>;
+  updatePassword: (newPassword: string) => Promise<AuthResult>;
+  clearRecoveryMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -71,6 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [teamMember, setTeamMember] = useState<DbTeamMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   /**
    * Fetches the team member record associated with the authenticated user.
@@ -91,10 +95,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   /**
+   * Parse URL hash to detect password recovery tokens.
+   * Supabase sends recovery tokens in URL hash: #access_token=...&type=recovery
+   */
+  const checkForRecoveryToken = useCallback(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      setIsRecoveryMode(true);
+      // Clear the hash from URL for cleaner appearance (but keep tokens for Supabase to process)
+      // We delay clearing to allow Supabase to read the tokens first
+    }
+  }, []);
+
+  /**
+   * Clear the URL hash after recovery tokens have been processed.
+   */
+  const clearUrlHash = useCallback(() => {
+    if (window.location.hash) {
+      // Use replaceState to clear hash without triggering navigation
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
+
+  /**
    * Initialize auth state on mount by checking for existing session.
    */
   useEffect(() => {
     let mounted = true;
+
+    // Check for recovery token in URL hash first
+    checkForRecoveryToken();
 
     async function initializeAuth() {
       try {
@@ -124,7 +154,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       mounted = false;
     };
-  }, [fetchTeamMember]);
+  }, [fetchTeamMember, checkForRecoveryToken]);
 
   /**
    * Subscribe to auth state changes.
@@ -142,9 +172,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setTeamMember(null);
         }
 
-        // Handle specific auth events if needed
+        // Handle specific auth events
         if (event === 'SIGNED_OUT') {
           setTeamMember(null);
+          setIsRecoveryMode(false);
+        }
+
+        // Handle password recovery event from Supabase
+        if (event === 'PASSWORD_RECOVERY') {
+          setIsRecoveryMode(true);
+          // Clear the URL hash after Supabase has processed the tokens
+          clearUrlHash();
         }
       }
     );
@@ -152,7 +190,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchTeamMember]);
+  }, [fetchTeamMember, clearUrlHash]);
 
   /**
    * Sign in with email and password.
@@ -252,6 +290,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return {};
   }, []);
 
+  /**
+   * Update the user's password (used during password recovery flow).
+   */
+  const updatePassword = useCallback(async (newPassword: string): Promise<AuthResult> => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      return { error };
+    }
+
+    // Clear recovery mode after successful password update
+    setIsRecoveryMode(false);
+    clearUrlHash();
+
+    return {};
+  }, [clearUrlHash]);
+
+  /**
+   * Clear recovery mode (used when user cancels or navigates away).
+   */
+  const clearRecoveryMode = useCallback(() => {
+    setIsRecoveryMode(false);
+    clearUrlHash();
+  }, [clearUrlHash]);
+
   const isAdmin = teamMember?.is_admin ?? false;
   const isAuthenticated = user !== null;
 
@@ -262,10 +327,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAdmin,
     isLoading,
     isAuthenticated,
+    isRecoveryMode,
     signIn,
     signUp,
     signOut,
     resetPassword,
+    updatePassword,
+    clearRecoveryMode,
   }), [
     user,
     session,
@@ -273,10 +341,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAdmin,
     isLoading,
     isAuthenticated,
+    isRecoveryMode,
     signIn,
     signUp,
     signOut,
     resetPassword,
+    updatePassword,
+    clearRecoveryMode,
   ]);
 
   return (

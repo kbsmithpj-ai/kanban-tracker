@@ -120,3 +120,17 @@
   height: 1px;
   background: var(--color-gray-300);
 }
+
+/* Reset Password Form Styles */
+.resetPasswordHint {
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-off-white);
+  border: 2px solid var(--color-gray-300);
+  border-radius: var(--nb-radius);
+  text-align: center;
+  line-height: 1.5;
+}
