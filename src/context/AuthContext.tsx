@@ -6,17 +6,17 @@ import { supabase } from '../lib/supabase';
 import type { DbTeamMember } from '../types/database';
 
 /**
- * Avatar color palette - matches the neo-brutalism design system colors.
+ * Avatar color palette - Confluence Genetics brand colors.
  */
 const AVATAR_COLORS = [
-  '#3B82F6', // blue
-  '#84CC16', // lime
-  '#EC4899', // pink
-  '#8B5CF6', // purple
-  '#F97316', // orange
-  '#14B8A6', // teal
-  '#EF4444', // red
-  '#6366F1', // indigo
+  '#00a8e8', // brand cyan
+  '#4cb944', // brand green
+  '#f5b800', // brand gold
+  '#7c5cbf', // purple
+  '#e07040', // orange
+  '#0088bc', // cyan dark
+  '#3a9435', // green dark
+  '#c49400', // gold dark
 ];
 
 /**

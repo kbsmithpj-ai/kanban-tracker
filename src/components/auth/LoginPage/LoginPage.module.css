@@ -59,13 +59,13 @@
 .error {
   background: var(--color-past-due-bg);
   border: 2px solid var(--color-past-due);
-  color: #991B1B;
+  color: #a03030;
 }
 
 .success {
   background: var(--color-completed-bg);
   border: 2px solid var(--color-completed);
-  color: #166534;
+  color: #2a7528;
 }
 
 .submitButton {

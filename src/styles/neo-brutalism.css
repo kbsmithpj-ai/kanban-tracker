@@ -1,9 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
+  /* ========================================
+     Confluence Genetics Brand Colors
+     ======================================== */
+
+  /* Primary Brand Colors */
+  --brand-navy: #1a2744;
+  --brand-navy-light: #243352;
+  --brand-navy-dark: #131d33;
+  --brand-cyan: #00a8e8;
+  --brand-cyan-light: #33c4f5;
+  --brand-cyan-dark: #0088bc;
+  --brand-green: #4cb944;
+  --brand-green-light: #6bc964;
+  --brand-green-dark: #3a9435;
+  --brand-gold: #f5b800;
+  --brand-gold-light: #ffc933;
+  --brand-gold-dark: #c49400;
+
   /* Core Neo-Brutalism Values */
   --nb-border-width: 3px;
-  --nb-border-color: #1A1A1A;
+  --nb-border-color: var(--brand-navy);
   --nb-border: var(--nb-border-width) solid var(--nb-border-color);
   --nb-shadow-offset: 4px;
   --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 var(--nb-border-color);
@@ -13,58 +31,62 @@
   /* Typography */
   --font-primary: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Category Colors */
-  --color-seed-pro: #3B82F6;
-  --color-seed-pro-bg: #DBEAFE;
-  --color-seed-pro-border: #1E40AF;
+  /* Category Colors - Aligned with Confluence Genetics brand */
+  --color-seed-pro: var(--brand-cyan);
+  --color-seed-pro-bg: #e6f7fc;
+  --color-seed-pro-border: var(--brand-cyan-dark);
 
-  --color-agronomy: #84CC16;
-  --color-agronomy-bg: #ECFCCB;
-  --color-agronomy-border: #3F6212;
+  --color-agronomy: var(--brand-green);
+  --color-agronomy-bg: #e8f5e6;
+  --color-agronomy-border: var(--brand-green-dark);
 
-  --color-sales: #EC4899;
-  --color-sales-bg: #FCE7F3;
-  --color-sales-border: #9D174D;
+  --color-sales: var(--brand-gold);
+  --color-sales-bg: #fef6de;
+  --color-sales-border: var(--brand-gold-dark);
 
-  --color-testing: #8B5CF6;
-  --color-testing-bg: #EDE9FE;
-  --color-testing-border: #5B21B6;
+  --color-testing: #7c5cbf;
+  --color-testing-bg: #f0ebf8;
+  --color-testing-border: #5b3d9e;
 
-  --color-samples: #F97316;
-  --color-samples-bg: #FED7AA;
-  --color-samples-border: #9A3412;
+  --color-samples: #e07040;
+  --color-samples-bg: #fce8e0;
+  --color-samples-border: #b85530;
 
-  /* Status Colors */
-  --color-planning: #FDE047;
-  --color-planning-bg: #FEF9C3;
+  /* Status Colors - Brand-aligned */
+  --color-planning: var(--brand-gold);
+  --color-planning-bg: #fef6de;
 
-  --color-in-progress: #38BDF8;
-  --color-in-progress-bg: #E0F2FE;
+  --color-in-progress: var(--brand-cyan);
+  --color-in-progress-bg: #e6f7fc;
 
-  --color-completed: #4ADE80;
-  --color-completed-bg: #DCFCE7;
+  --color-completed: var(--brand-green);
+  --color-completed-bg: #e8f5e6;
 
-  --color-past-due: #F87171;
-  --color-past-due-bg: #FEE2E2;
+  --color-past-due: #e05252;
+  --color-past-due-bg: #fce8e8;
 
-  /* Priority Colors */
-  --color-priority-low: #94A3B8;
-  --color-priority-medium: #FDE047;
-  --color-priority-high: #F97316;
-  --color-priority-urgent: #EF4444;
+  /* Priority Colors - Brand-aligned */
+  --color-priority-low: #7a8ba3;
+  --color-priority-medium: var(--brand-gold);
+  --color-priority-high: #e07040;
+  --color-priority-urgent: #e05252;
 
-  /* Neutral Colors */
+  /* Neutral Colors - Navy-tinted for brand cohesion */
   --color-white: #FFFFFF;
-  --color-off-white: #FAFAFA;
-  --color-gray-100: #F3F4F6;
-  --color-gray-200: #E5E7EB;
-  --color-gray-300: #D1D5DB;
-  --color-gray-400: #9CA3AF;
-  --color-gray-500: #6B7280;
-  --color-gray-600: #4B5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1F2937;
-  --color-black: #1A1A1A;
+  --color-off-white: #f8fafc;
+  --color-gray-100: #f1f4f8;
+  --color-gray-200: #e2e7ef;
+  --color-gray-300: #c8d1de;
+  --color-gray-400: #8e9bb0;
+  --color-gray-500: #5d6b82;
+  --color-gray-600: #455068;
+  --color-gray-700: #343f54;
+  --color-gray-800: var(--brand-navy-light);
+  --color-black: var(--brand-navy);
+
+  /* Accent Colors for UI highlights */
+  --color-accent: var(--brand-cyan);
+  --color-accent-hover: var(--brand-cyan-light);
 
   /* Spacing */
   --space-xs: 4px;

@@ -15,9 +15,14 @@ export function Header() {
 
   return (
     <header className={styles.header}>
-      <h1 className={styles.logo}>
-        Kanban<span className={styles.logoAccent}>Tracker</span>
-      </h1>
+      <div className={styles.branding}>
+        <h1 className={styles.teamTitle}>
+          <span className={styles.teamTitleAccent}>Pre-Comm</span> Team
+        </h1>
+        <span className={styles.logo}>
+          Kanban<span className={styles.logoAccent}>Tracker</span>
+        </span>
+      </div>
 
       <nav className={styles.nav} aria-label="View selection">
         {views.map(view => (

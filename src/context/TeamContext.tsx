@@ -16,17 +16,18 @@ import type { TeamMember } from '../types/team';
 
 /**
  * Predefined avatar colors for new team members.
+ * Confluence Genetics brand colors.
  * Colors are assigned based on the hash of the member's email.
  */
 const AVATAR_COLORS = [
-  '#3B82F6', // blue
-  '#84CC16', // lime
-  '#EC4899', // pink
-  '#8B5CF6', // violet
-  '#F59E0B', // amber
-  '#10B981', // emerald
-  '#EF4444', // red
-  '#06B6D4', // cyan
+  '#00a8e8', // brand cyan
+  '#4cb944', // brand green
+  '#f5b800', // brand gold
+  '#7c5cbf', // purple
+  '#e07040', // orange
+  '#0088bc', // cyan dark
+  '#3a9435', // green dark
+  '#c49400', // gold dark
 ];
 
 /**

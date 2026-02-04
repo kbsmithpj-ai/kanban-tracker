@@ -9,12 +9,12 @@ import { Avatar } from '../../common/Avatar';
 import { Badge } from '../../common/Badge';
 import styles from './DayView.module.css';
 
-// Priority color mapping for visual indicator
+// Priority color mapping for visual indicator (Confluence Genetics brand-aligned)
 const priorityColors: Record<string, string> = {
-  low: 'var(--color-priority-low, #22C55E)',
-  medium: 'var(--color-priority-medium, #EAB308)',
-  high: 'var(--color-priority-high, #F97316)',
-  urgent: 'var(--color-priority-urgent, #EF4444)',
+  low: 'var(--color-priority-low, #7a8ba3)',
+  medium: 'var(--color-priority-medium, #f5b800)',
+  high: 'var(--color-priority-high, #e07040)',
+  urgent: 'var(--color-priority-urgent, #e05252)',
 };
 
 // Priority labels for accessibility
