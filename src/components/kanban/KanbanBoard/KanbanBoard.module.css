@@ -1,0 +1,38 @@
+.board {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  overflow-x: auto;
+  min-height: calc(100vh - 200px);
+}
+
+.board::-webkit-scrollbar {
+  height: 8px;
+}
+
+.board::-webkit-scrollbar-track {
+  background: var(--color-gray-200);
+  border-radius: 4px;
+}
+
+.board::-webkit-scrollbar-thumb {
+  background: var(--color-gray-400);
+  border-radius: 4px;
+}
+
+.board::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-500);
+}
+
+/* Ensure columns don't shrink below their min-width on scroll */
+.board > * {
+  flex-shrink: 0;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .board {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+}

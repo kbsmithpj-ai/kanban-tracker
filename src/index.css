@@ -1,0 +1,5 @@
+@import './styles/neo-brutalism.css';
+
+#root {
+  min-height: 100vh;
+}

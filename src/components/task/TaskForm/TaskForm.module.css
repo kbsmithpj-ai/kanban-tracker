@@ -1,0 +1,117 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.priorityGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.priorityLabel {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-700);
+}
+
+.priorityOptions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.priorityOption {
+  flex: 1;
+  padding: var(--space-sm);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  background: var(--color-white);
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: all var(--transition-fast);
+}
+
+.priorityOption:hover {
+  transform: translateY(-2px);
+}
+
+.priorityOption:focus {
+  outline: 2px solid var(--color-seed-pro);
+  outline-offset: 2px;
+}
+
+.priorityOption.selected {
+  box-shadow: var(--nb-shadow);
+}
+
+.priorityLow {
+  background: var(--color-gray-100);
+}
+
+.priorityLow.selected {
+  background: var(--color-priority-low);
+  color: white;
+}
+
+.priorityMed {
+  background: var(--color-gray-100);
+}
+
+.priorityMed.selected {
+  background: var(--color-priority-medium);
+  color: var(--color-black);
+}
+
+.priorityHigh {
+  background: var(--color-gray-100);
+}
+
+.priorityHigh.selected {
+  background: var(--color-priority-high);
+  color: white;
+}
+
+.priorityUrgent {
+  background: var(--color-gray-100);
+}
+
+.priorityUrgent.selected {
+  background: var(--color-priority-urgent);
+  color: white;
+}
+
+.deleteSection {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px dashed var(--color-gray-300);
+}
+
+.deleteWarning {
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  margin-bottom: var(--space-sm);
+}

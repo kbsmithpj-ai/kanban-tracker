@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Core Neo-Brutalism Values */
+  --nb-border-width: 3px;
+  --nb-border-color: #1A1A1A;
+  --nb-border: var(--nb-border-width) solid var(--nb-border-color);
+  --nb-shadow-offset: 4px;
+  --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 var(--nb-border-color);
+  --nb-shadow-hover: 6px 6px 0 var(--nb-border-color);
+  --nb-radius: 8px;
+
+  /* Typography */
+  --font-primary: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Category Colors */
+  --color-seed-pro: #3B82F6;
+  --color-seed-pro-bg: #DBEAFE;
+  --color-seed-pro-border: #1E40AF;
+
+  --color-agronomy: #84CC16;
+  --color-agronomy-bg: #ECFCCB;
+  --color-agronomy-border: #3F6212;
+
+  --color-sales: #EC4899;
+  --color-sales-bg: #FCE7F3;
+  --color-sales-border: #9D174D;
+
+  --color-testing: #8B5CF6;
+  --color-testing-bg: #EDE9FE;
+  --color-testing-border: #5B21B6;
+
+  --color-samples: #F97316;
+  --color-samples-bg: #FED7AA;
+  --color-samples-border: #9A3412;
+
+  /* Status Colors */
+  --color-planning: #FDE047;
+  --color-planning-bg: #FEF9C3;
+
+  --color-in-progress: #38BDF8;
+  --color-in-progress-bg: #E0F2FE;
+
+  --color-completed: #4ADE80;
+  --color-completed-bg: #DCFCE7;
+
+  --color-past-due: #F87171;
+  --color-past-due-bg: #FEE2E2;
+
+  /* Priority Colors */
+  --color-priority-low: #94A3B8;
+  --color-priority-medium: #FDE047;
+  --color-priority-high: #F97316;
+  --color-priority-urgent: #EF4444;
+
+  /* Neutral Colors */
+  --color-white: #FFFFFF;
+  --color-off-white: #FAFAFA;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-black: #1A1A1A;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+}
+
+/* Global Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--color-off-white);
+  color: var(--color-black);
+  line-height: 1.5;
+}
+
+/* Neo-Brutalism Utility Classes */
+.nb-card {
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.nb-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-hover);
+}
+
+.nb-card-static {
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+}
+
+.nb-heading {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

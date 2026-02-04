@@ -1,0 +1,71 @@
+.taskCard {
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  padding: var(--space-md);
+  cursor: grab;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--nb-shadow);
+}
+
+.taskCard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-hover);
+}
+
+.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.title {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-black);
+  margin: 0;
+  flex: 1;
+  word-break: break-word;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.dueDate {
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  color: var(--color-gray-600);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.overdue {
+  color: var(--color-past-due);
+  font-weight: 600;
+}
+
+.priority {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--color-black);
+  flex-shrink: 0;
+}
+
+.categoryBorder {
+  border-left-width: 4px;
+}

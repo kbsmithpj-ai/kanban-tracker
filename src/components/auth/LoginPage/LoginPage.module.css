@@ -1,0 +1,122 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-off-white);
+  padding: var(--space-lg);
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+  padding: var(--space-xl);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.logo {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-500);
+  margin-bottom: var(--space-sm);
+}
+
+.title {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-black);
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.message {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--nb-radius);
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.error {
+  background: var(--color-past-due-bg);
+  border: 2px solid var(--color-past-due);
+  color: #991B1B;
+}
+
+.success {
+  background: var(--color-completed-bg);
+  border: 2px solid var(--color-completed);
+  color: #166534;
+}
+
+.submitButton {
+  margin-top: var(--space-sm);
+}
+
+.footer {
+  margin-top: var(--space-lg);
+  text-align: center;
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+}
+
+.footerText {
+  margin-bottom: var(--space-sm);
+}
+
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-seed-pro);
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--transition-fast);
+}
+
+.link:hover {
+  color: var(--color-seed-pro-border);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+  color: var(--color-gray-400);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-gray-300);
+}

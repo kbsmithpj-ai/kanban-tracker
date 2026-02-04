@@ -1,0 +1,135 @@
+.userMenu {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs);
+  border-radius: var(--nb-radius);
+  transition: background var(--transition-fast);
+}
+
+.trigger:hover {
+  background: var(--color-gray-100);
+}
+
+.trigger:focus {
+  outline: 2px solid var(--color-seed-pro);
+  outline-offset: 2px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: var(--nb-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--color-white);
+  box-shadow: 2px 2px 0 var(--nb-border-color);
+  flex-shrink: 0;
+}
+
+.name {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-black);
+}
+
+.adminBadge {
+  background: var(--color-black);
+  color: var(--color-white);
+  padding: 2px var(--space-sm);
+  border-radius: 4px;
+  font-family: var(--font-primary);
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chevron {
+  color: var(--color-gray-500);
+  transition: transform var(--transition-fast);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-sm));
+  right: 0;
+  min-width: 220px;
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+  z-index: 100;
+  animation: dropdownFadeIn 150ms ease;
+  overflow: hidden;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.userInfo {
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.userName {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-black);
+  margin-bottom: var(--space-xs);
+}
+
+.email {
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  word-break: break-all;
+}
+
+.dropdownActions {
+  padding: var(--space-sm);
+}
+
+.signOutButton {
+  width: 100%;
+  justify-content: flex-start;
+  text-transform: none;
+  font-weight: 500;
+}
+
+/* Responsive: hide name on small screens */
+@media (max-width: 768px) {
+  .name {
+    display: none;
+  }
+
+  .adminBadge {
+    display: none;
+  }
+}

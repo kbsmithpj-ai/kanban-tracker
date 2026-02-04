@@ -1,0 +1,104 @@
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  max-width: 320px;
+  flex: 1;
+  background: var(--color-gray-100);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: var(--nb-border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.title {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.count {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 0.75rem;
+  background: var(--color-white);
+  border: 2px solid var(--color-black);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: var(--space-xs);
+  color: var(--color-gray-600);
+  transition: color var(--transition-fast);
+}
+
+.addButton:hover {
+  color: var(--color-black);
+}
+
+.addButton:focus-visible {
+  outline: 2px solid var(--color-black);
+  outline-offset: 2px;
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-height: 200px;
+  overflow-y: auto;
+}
+
+.dropArea {
+  flex: 1;
+  border-radius: var(--nb-radius);
+  transition: background-color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.dropAreaOver {
+  background-color: var(--color-gray-200);
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 100px;
+  color: var(--color-gray-400);
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+}

@@ -1,0 +1,73 @@
+.button {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-sm) var(--space-md);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--nb-shadow);
+  background: var(--color-white);
+  color: var(--color-black);
+}
+
+.button:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-hover);
+}
+
+.button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--nb-border-color);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Variants */
+.primary {
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+.danger {
+  background: var(--color-past-due);
+  color: var(--color-white);
+}
+
+.ghost {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--color-gray-100);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Sizes */
+.small {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.75rem;
+}
+
+.large {
+  padding: var(--space-md) var(--space-lg);
+  font-size: 1rem;
+}
+
+/* Full width */
+.fullWidth {
+  width: 100%;
+}

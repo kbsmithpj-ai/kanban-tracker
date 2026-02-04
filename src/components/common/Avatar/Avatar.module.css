@@ -1,0 +1,35 @@
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--nb-border);
+  border-radius: 50%;
+  font-family: var(--font-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-white);
+  box-shadow: 2px 2px 0 var(--nb-border-color);
+}
+
+.small {
+  width: 24px;
+  height: 24px;
+  font-size: 0.625rem;
+}
+
+.medium {
+  width: 32px;
+  height: 32px;
+  font-size: 0.75rem;
+}
+
+.large {
+  width: 40px;
+  height: 40px;
+  font-size: 0.875rem;
+}
+
+.unassigned {
+  background: var(--color-gray-300);
+  color: var(--color-gray-600);
+}

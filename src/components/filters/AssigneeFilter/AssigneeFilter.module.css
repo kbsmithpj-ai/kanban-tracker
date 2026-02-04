@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.label {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-700);
+}
+
+.select {
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  padding: var(--space-sm) var(--space-md);
+  padding-right: var(--space-xl);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  background: var(--color-white);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A1A1A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-sm) center;
+  box-shadow: 2px 2px 0 var(--nb-border-color);
+  transition: box-shadow var(--transition-fast);
+}
+
+.select:focus {
+  outline: none;
+  box-shadow: var(--nb-shadow);
+}

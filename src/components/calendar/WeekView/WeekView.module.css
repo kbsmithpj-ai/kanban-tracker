@@ -1,0 +1,126 @@
+.weekView {
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  overflow: hidden;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--color-gray-100);
+  border-bottom: var(--nb-border);
+}
+
+.dayHeader {
+  padding: var(--space-md);
+  text-align: center;
+  border-right: 1px solid var(--color-gray-200);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.dayHeader:last-child {
+  border-right: none;
+}
+
+.dayHeader:hover {
+  background-color: var(--color-gray-200);
+}
+
+.dayHeader:focus-visible {
+  outline: 2px solid var(--color-black);
+  outline-offset: -2px;
+}
+
+.dayHeader.today {
+  background-color: var(--color-planning-bg);
+}
+
+.dayName {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-600);
+  margin-bottom: var(--space-xs);
+}
+
+.dayDate {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.dayHeader.today .dayDate {
+  background: var(--color-black);
+  color: var(--color-white);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  min-height: 400px;
+}
+
+.dayColumn {
+  border-right: 1px solid var(--color-gray-200);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.dayColumn:last-child {
+  border-right: none;
+}
+
+.taskCard {
+  background: var(--color-white);
+  border: 2px solid var(--nb-border-color);
+  border-radius: var(--nb-radius);
+  padding: var(--space-sm);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--nb-border-color);
+  transition: all var(--transition-fast);
+}
+
+.taskCard:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--nb-border-color);
+}
+
+.taskCard:focus-visible {
+  outline: 2px solid var(--color-black);
+  outline-offset: 2px;
+}
+
+.taskTitle {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  margin-bottom: var(--space-xs);
+  word-break: break-word;
+}
+
+.taskMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.emptyDay {
+  color: var(--color-gray-400);
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  text-align: center;
+  padding: var(--space-md);
+}

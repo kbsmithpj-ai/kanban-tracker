@@ -1,0 +1,122 @@
+.dayView {
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  padding: var(--space-lg);
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.taskCard {
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  padding: var(--space-md);
+  cursor: pointer;
+  box-shadow: var(--nb-shadow);
+  transition: all var(--transition-fast);
+  border-left-width: 6px;
+}
+
+.taskCard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-hover);
+}
+
+.taskCard:focus-visible {
+  outline: 2px solid var(--color-black);
+  outline-offset: 2px;
+}
+
+.taskHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.taskTitle {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.taskDescription {
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  margin-bottom: var(--space-md);
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.taskMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  color: var(--color-gray-600);
+}
+
+.priority {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--color-black);
+  flex-shrink: 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--color-gray-500);
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+}
+
+.emptyText {
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  margin-bottom: var(--space-md);
+}
+
+.addButton {
+  background: var(--color-black);
+  color: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--nb-shadow);
+  transition: all var(--transition-fast);
+}
+
+.addButton:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-hover);
+}
+
+.addButton:focus-visible {
+  outline: 2px solid var(--color-white);
+  outline-offset: 2px;
+}

@@ -1,0 +1,118 @@
+.monthView {
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  overflow: hidden;
+}
+
+.weekDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--color-gray-100);
+  border-bottom: var(--nb-border);
+}
+
+.weekDay {
+  padding: var(--space-sm);
+  text-align: center;
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-600);
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.dayCell {
+  min-height: 100px;
+  border-right: 1px solid var(--color-gray-200);
+  border-bottom: 1px solid var(--color-gray-200);
+  padding: var(--space-xs);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.dayCell:nth-child(7n) {
+  border-right: none;
+}
+
+.dayCell:hover {
+  background-color: var(--color-gray-100);
+}
+
+.dayCell:focus-visible {
+  outline: 2px solid var(--color-black);
+  outline-offset: -2px;
+}
+
+.dayHeader {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-xs);
+}
+
+.dayNumber {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.otherMonth {
+  background-color: var(--color-gray-100);
+}
+
+.otherMonth .dayNumber {
+  color: var(--color-gray-400);
+}
+
+.today .dayNumber {
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.taskItem {
+  font-family: var(--font-primary);
+  font-size: 0.625rem;
+  padding: 2px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 3px solid;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.taskItem:hover {
+  transform: translateX(2px);
+}
+
+.taskItem:focus-visible {
+  outline: 2px solid var(--color-black);
+  outline-offset: 1px;
+}
+
+.moreCount {
+  font-family: var(--font-primary);
+  font-size: 0.625rem;
+  color: var(--color-gray-500);
+  padding: 2px 4px;
+}

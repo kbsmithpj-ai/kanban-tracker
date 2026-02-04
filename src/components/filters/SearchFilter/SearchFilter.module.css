@@ -1,0 +1,66 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.label {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-700);
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  padding: var(--space-sm) var(--space-md);
+  padding-left: var(--space-xl);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  background: var(--color-white);
+  box-shadow: 2px 2px 0 var(--nb-border-color);
+  transition: box-shadow var(--transition-fast);
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: var(--nb-shadow);
+}
+
+.input::placeholder {
+  color: var(--color-gray-400);
+}
+
+.icon {
+  position: absolute;
+  left: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-gray-400);
+  font-size: 1rem;
+}
+
+.clearButton {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-gray-400);
+  font-size: 1rem;
+  padding: 0;
+}
+
+.clearButton:hover {
+  color: var(--color-gray-600);
+}
