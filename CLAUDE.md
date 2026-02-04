@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+**Pre-Comm Team Kanban Tracker** - A task management app for the Confluence Genetics Pre-Commercial team.
+
+**Production URL:** https://kanban-tracker-six.vercel.app
+
 ## Commands
 
 ```bash
@@ -10,6 +16,16 @@ npm run build    # TypeScript compile + Vite production build
 npm run lint     # ESLint
 npm run preview  # Preview production build
 ```
+
+## Deployment
+
+The app is deployed to **Vercel** and auto-deploys on push to `main`.
+
+- Production: https://kanban-tracker-six.vercel.app
+- Vercel project: `kbsmiths-projects/kanban-tracker`
+- GitHub repo: `kbsmithpj-ai/kanban-tracker`
+
+Environment variables are configured in Vercel dashboard.
 
 ## Architecture
 
@@ -27,6 +43,11 @@ The app uses **Supabase** for authentication, database, and real-time sync.
 - Admins can manage team members
 - Users can create their own team_member record on signup
 
+**Supabase URL Configuration** (Authentication → URL Configuration):
+- Site URL: `https://kanban-tracker-six.vercel.app`
+- Redirect URLs: `https://kanban-tracker-six.vercel.app`, `https://kanban-tracker-six.vercel.app/reset-password`
+- For local dev, also add `http://localhost:5173` and `http://localhost:5174`
+
 **Environment Variables** (`.env.local`):
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
@@ -37,11 +58,11 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 Five React Contexts manage application state:
 
-- **AuthContext** (`src/context/AuthContext.tsx`): Authentication state, sign in/up/out, current user and team member profile.
-- **TeamContext** (`src/context/TeamContext.tsx`): Team members list with real-time sync from Supabase.
+- **AuthContext** (`src/context/AuthContext.tsx`): Authentication state, sign in/up/out, password reset/recovery, current user and team member profile.
+- **TeamContext** (`src/context/TeamContext.tsx`): Team members list with real-time sync from Supabase. Includes `inviteTeamMember()` for admin invitations.
 - **TaskContext** (`src/context/TaskContext.tsx`): Task CRUD, drag-drop reordering, auto-detection of past-due status. Persists to Supabase with real-time sync.
 - **FilterContext** (`src/context/FilterContext.tsx`): Filter state (assignee, categories, statuses, search). Persists to localStorage.
-- **UIContext** (`src/context/UIContext.tsx`): View mode (kanban/month/week/day), selected date, modal state, sidebar toggle. In-memory only.
+- **UIContext** (`src/context/UIContext.tsx`): View mode (kanban/month/week/day), selected date, modal state (task modal, invite modal), sidebar toggle. In-memory only.
 
 Access contexts via hooks: `useAuth()`, `useTeam()`, `useTasks()`, `useFilters()`, `useUI()`.
 
@@ -62,22 +83,44 @@ Note: `'past-due'` is a computed status (not stored in DB). Tasks are stored as 
 
 Past-due status is computed automatically via `getEffectiveStatus()` when a task has an overdue date and isn't completed.
 
+### Authentication Flows
+
+**Sign In/Sign Up:** Standard email + password authentication via Supabase.
+
+**Password Reset:**
+1. User clicks "Forgot password?" → enters email
+2. Supabase sends recovery email with magic link
+3. Link contains `#type=recovery` hash → app detects and shows password reset form
+4. `AuthContext.updatePassword()` sets new password via Supabase
+
+**Team Member Invitation (Admin only):**
+1. Admin clicks "Invite" button in header → InviteModal opens
+2. Enter email and name → sends magic link via `supabase.auth.signInWithOtp()`
+3. Creates pending `team_member` record with `user_id: null`
+4. Invited user clicks link to complete signup
+
 ### Component Organization
 ```
 src/components/
-├── auth/       # LoginPage
+├── auth/       # LoginPage (login, signup, forgot-password, reset-password modes)
 ├── common/     # Button, Input, Select, Modal, Avatar, Badge
 ├── kanban/     # KanbanBoard, KanbanColumn, TaskCard
 ├── calendar/   # CalendarHeader, MonthView, WeekView, DayView
 ├── filters/    # FilterBar, CategoryFilter, StatusFilter, AssigneeFilter, SearchFilter
-├── layout/     # Header, Sidebar, MainContent
-└── task/       # TaskForm, TaskModal
+├── layout/     # Header (with Invite button for admins), Sidebar, MainContent
+├── task/       # TaskForm, TaskModal
+└── team/       # InviteModal
 ```
 
 Each component has a folder with `ComponentName.tsx`, `ComponentName.module.css`, and `index.ts` barrel export.
 
 ### Styling
 - **Neo-brutalism design system** defined in `src/styles/neo-brutalism.css`
+- **Confluence Genetics brand colors:**
+  - `--brand-navy: #1a2744` (primary background, borders, shadows)
+  - `--brand-cyan: #00a8e8` (accent color, links, in-progress status)
+  - `--brand-green: #4cb944` (completed status, agronomy category)
+  - `--brand-gold: #f5b800` (planning status, sales category)
 - CSS custom properties for colors, spacing, borders, shadows
 - CSS Modules for component-scoped styles
 - Key visual properties: 3px borders, 4px offset shadows, 8px border radius
