@@ -38,10 +38,34 @@ export const storage = {
   },
 
   get: <T>(key: string, defaultValue: T): T => {
+    const fullKey = STORAGE_PREFIX + key;
     try {
-      const item = localStorage.getItem(STORAGE_PREFIX + key);
-      return item ? JSON.parse(item) : defaultValue;
-    } catch {
+      const item = localStorage.getItem(fullKey);
+      if (item === null) {
+        return defaultValue;
+      }
+
+      const parsed = JSON.parse(item);
+
+      // Validate that parsed value is of expected type (basic check)
+      // If defaultValue is an object, parsed should also be an object (not null/array for objects)
+      if (typeof defaultValue === 'object' && defaultValue !== null && !Array.isArray(defaultValue)) {
+        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+          console.warn(`Corrupted localStorage value for "${key}": expected object, got ${typeof parsed}. Clearing.`);
+          storage.remove(key);
+          return defaultValue;
+        }
+      }
+
+      return parsed as T;
+    } catch (error) {
+      // JSON parse failed - data is corrupted
+      console.warn(`Failed to parse localStorage value for "${key}". Clearing corrupted data.`, error);
+      try {
+        localStorage.removeItem(fullKey);
+      } catch {
+        // Ignore removal errors
+      }
       return defaultValue;
     }
   },

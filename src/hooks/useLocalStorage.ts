@@ -15,7 +15,13 @@ export function useLocalStorage<T>(
   options?: UseLocalStorageOptions
 ) {
   const [storedValue, setStoredValue] = useState<T>(() => {
-    return storage.get(key, initialValue);
+    try {
+      return storage.get(key, initialValue);
+    } catch (error) {
+      // Catch any unexpected errors during initial read
+      console.warn(`useLocalStorage: Failed to read "${key}", using default value`, error);
+      return initialValue;
+    }
   });
 
   // Track the current value in a ref to avoid stale closures in the storage event handler

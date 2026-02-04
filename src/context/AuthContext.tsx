@@ -1,9 +1,16 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { DbTeamMember } from '../types/database';
+import { withTimeout, clearAuthState } from '../utils/recovery';
+
+/** Timeout for session initialization (5 seconds) */
+const SESSION_TIMEOUT_MS = 5000;
+
+/** Timeout for fetching team member data (5 seconds) */
+const TEAM_MEMBER_TIMEOUT_MS = 5000;
 
 /**
  * Avatar color palette - Confluence Genetics brand colors.
@@ -55,12 +62,16 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   isRecoveryMode: boolean;
+  /** Error message when auth initialization fails */
+  authError: string | null;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, name: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<AuthResult>;
   updatePassword: (newPassword: string) => Promise<AuthResult>;
   clearRecoveryMode: () => void;
+  /** Retry authentication after an error */
+  retryAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -75,23 +86,52 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [teamMember, setTeamMember] = useState<DbTeamMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  /** Track initialization attempts to allow retry */
+  const initAttemptRef = useRef(0);
 
   /**
    * Fetches the team member record associated with the authenticated user.
+   * Returns null if the user doesn't have a team member record (expected for new invites).
+   * Throws on network/timeout errors to allow proper error handling upstream.
    */
   const fetchTeamMember = useCallback(async (userId: string): Promise<DbTeamMember | null> => {
-    const { data, error } = await supabase
-      .from('team_members')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    try {
+      // Create a proper Promise wrapper for the Supabase query
+      const fetchPromise = Promise.resolve(
+        supabase
+          .from('team_members')
+          .select('*')
+          .eq('user_id', userId)
+          .single()
+      );
 
-    if (error) {
-      console.error('Failed to fetch team member:', error);
-      return null;
+      const result = await withTimeout(
+        fetchPromise,
+        TEAM_MEMBER_TIMEOUT_MS,
+        'Team member fetch timed out'
+      );
+
+      const { data, error } = result;
+
+      if (error) {
+        // PGRST116 means no rows found - this is expected for users not yet in team_members
+        // (e.g., during invitation flow before they complete signup)
+        if (error.code === 'PGRST116') {
+          console.warn('No team member record found for user:', userId);
+          return null;
+        }
+        console.error('Failed to fetch team member:', error);
+        return null;
+      }
+
+      return data as DbTeamMember;
+    } catch (error) {
+      // Timeout or network error
+      console.error('Team member fetch failed:', error);
+      throw error; // Re-throw to allow upstream handling
     }
-
-    return data as DbTeamMember;
   }, []);
 
   /**
@@ -119,31 +159,97 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Initialize auth state on mount by checking for existing session.
+   * Includes timeout protection and error recovery.
    */
   useEffect(() => {
     let mounted = true;
+    const currentAttempt = ++initAttemptRef.current;
 
     // Check for recovery token in URL hash first
     checkForRecoveryToken();
 
     async function initializeAuth() {
-      try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+      // Clear any previous error
+      setAuthError(null);
 
-        if (!mounted) return;
+      try {
+        // Wrap getSession with timeout to prevent indefinite loading
+        const sessionPromise = supabase.auth.getSession();
+        const { data: { session: currentSession } } = await withTimeout(
+          sessionPromise,
+          SESSION_TIMEOUT_MS,
+          'Session fetch timed out'
+        );
+
+        if (!mounted || currentAttempt !== initAttemptRef.current) return;
 
         if (currentSession?.user) {
+          // Validate that the session isn't expired
+          const now = Math.floor(Date.now() / 1000);
+          if (currentSession.expires_at && currentSession.expires_at < now) {
+            console.warn('Session has expired, clearing auth state');
+            await clearAuthState();
+            if (mounted) {
+              setSession(null);
+              setUser(null);
+              setTeamMember(null);
+            }
+            return;
+          }
+
           setSession(currentSession);
           setUser(currentSession.user);
-          const member = await fetchTeamMember(currentSession.user.id);
-          if (mounted) {
-            setTeamMember(member);
+
+          try {
+            const member = await fetchTeamMember(currentSession.user.id);
+            if (mounted && currentAttempt === initAttemptRef.current) {
+              setTeamMember(member);
+              // Note: member being null is OK - user might not have a team_member record yet
+              // (e.g., during invitation flow)
+            }
+          } catch (teamMemberError) {
+            // Team member fetch failed (timeout or network error)
+            // User is still authenticated, but we couldn't get their profile
+            console.warn('Could not fetch team member, continuing with auth only:', teamMemberError);
+            if (mounted && currentAttempt === initAttemptRef.current) {
+              setTeamMember(null);
+            }
           }
         }
       } catch (error) {
         console.error('Failed to initialize auth:', error);
+
+        if (!mounted || currentAttempt !== initAttemptRef.current) return;
+
+        // Check if this is a timeout error
+        const isTimeout = error instanceof Error && error.message.includes('timed out');
+
+        if (isTimeout) {
+          // Session fetch timed out - likely corrupted state or network issue
+          // Clear auth state and show error
+          console.warn('Session initialization timed out, clearing auth state');
+          try {
+            await clearAuthState();
+          } catch {
+            // Ignore cleanup errors
+          }
+          setAuthError('Connection timed out. Please check your internet connection and try again.');
+        } else {
+          // Other error - clear state and show generic error
+          try {
+            await clearAuthState();
+          } catch {
+            // Ignore cleanup errors
+          }
+          setAuthError('Failed to load your session. Please try again.');
+        }
+
+        // Reset auth state
+        setSession(null);
+        setUser(null);
+        setTeamMember(null);
       } finally {
-        if (mounted) {
+        if (mounted && currentAttempt === initAttemptRef.current) {
           setIsLoading(false);
         }
       }
@@ -158,31 +264,64 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Subscribe to auth state changes.
+   * Handles sign in/out, token refresh, and password recovery events.
    */
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        // Clear any auth error on successful auth events
+        if (currentSession) {
+          setAuthError(null);
+        }
+
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          const member = await fetchTeamMember(currentSession.user.id);
-          setTeamMember(member);
+          try {
+            const member = await fetchTeamMember(currentSession.user.id);
+            setTeamMember(member);
+          } catch (error) {
+            // Team member fetch failed, but user is still authenticated
+            console.warn('Failed to fetch team member on auth change:', error);
+            setTeamMember(null);
+          }
         } else {
           setTeamMember(null);
         }
 
         // Handle specific auth events
-        if (event === 'SIGNED_OUT') {
-          setTeamMember(null);
-          setIsRecoveryMode(false);
-        }
+        switch (event) {
+          case 'SIGNED_OUT':
+            setTeamMember(null);
+            setIsRecoveryMode(false);
+            setAuthError(null);
+            break;
 
-        // Handle password recovery event from Supabase
-        if (event === 'PASSWORD_RECOVERY') {
-          setIsRecoveryMode(true);
-          // Clear the URL hash after Supabase has processed the tokens
-          clearUrlHash();
+          case 'PASSWORD_RECOVERY':
+            // Handle password recovery event from Supabase
+            setIsRecoveryMode(true);
+            // Clear the URL hash after Supabase has processed the tokens
+            clearUrlHash();
+            break;
+
+          case 'TOKEN_REFRESHED':
+            // Token was refreshed successfully - update session state
+            // This ensures the app has the latest valid tokens
+            if (currentSession) {
+              setSession(currentSession);
+            }
+            break;
+
+          case 'SIGNED_IN':
+          case 'INITIAL_SESSION':
+            // Clear loading state on successful auth
+            setIsLoading(false);
+            break;
+
+          default:
+            // Handle any other events
+            break;
         }
       }
     );
@@ -317,6 +456,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
     clearUrlHash();
   }, [clearUrlHash]);
 
+  /**
+   * Retry authentication after an error.
+   * Triggers re-initialization by incrementing the attempt counter.
+   */
+  const retryAuth = useCallback(() => {
+    setIsLoading(true);
+    setAuthError(null);
+    // Increment the attempt ref to trigger the useEffect
+    initAttemptRef.current++;
+    // Force a re-run of the init effect by updating state
+    setUser(null);
+    setSession(null);
+    setTeamMember(null);
+  }, []);
+
+  // Re-run initialization when retryAuth is called
+  useEffect(() => {
+    // This effect re-triggers initialization when auth state is reset via retryAuth
+    // The initAttemptRef ensures we don't double-run
+    if (!isLoading && authError === null && user === null && session === null) {
+      // Check if we were explicitly reset (not initial load)
+      const currentAttempt = initAttemptRef.current;
+      if (currentAttempt > 1) {
+        setIsLoading(true);
+        // The main initialization effect will pick this up
+      }
+    }
+  }, [isLoading, authError, user, session]);
+
   const isAdmin = teamMember?.is_admin ?? false;
   const isAuthenticated = user !== null;
 
@@ -328,12 +496,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     isAuthenticated,
     isRecoveryMode,
+    authError,
     signIn,
     signUp,
     signOut,
     resetPassword,
     updatePassword,
     clearRecoveryMode,
+    retryAuth,
   }), [
     user,
     session,
@@ -342,12 +512,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     isAuthenticated,
     isRecoveryMode,
+    authError,
     signIn,
     signUp,
     signOut,
     resetPassword,
     updatePassword,
     clearRecoveryMode,
+    retryAuth,
   ]);
 
   return (
