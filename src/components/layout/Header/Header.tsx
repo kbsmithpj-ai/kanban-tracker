@@ -1,4 +1,4 @@
-import { useUI } from '../../../context';
+import { useUI, useAuth } from '../../../context';
 import type { ViewMode } from '../../../context';
 import { UserMenu } from '../../auth';
 import styles from './Header.module.css';
@@ -11,7 +11,8 @@ const views: { id: ViewMode; label: string }[] = [
 ];
 
 export function Header() {
-  const { viewMode, setViewMode, openTaskModal } = useUI();
+  const { viewMode, setViewMode, openTaskModal, openInviteModal } = useUI();
+  const { isAdmin } = useAuth();
 
   return (
     <header className={styles.header}>
@@ -38,6 +39,15 @@ export function Header() {
       </nav>
 
       <div className={styles.actions}>
+        {isAdmin && (
+          <button
+            className={styles.inviteButton}
+            onClick={openInviteModal}
+            aria-label="Invite team member"
+          >
+            <span aria-hidden="true">&#9993;</span> Invite
+          </button>
+        )}
         <button
           className={styles.addButton}
           onClick={() => openTaskModal(null)}

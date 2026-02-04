@@ -68,6 +68,11 @@ function transformDbTeamMember(db: DbTeamMember): TeamMember {
   };
 }
 
+export interface InviteResult {
+  success: boolean;
+  message: string;
+}
+
 export interface TeamContextValue {
   /** List of all team members */
   teamMembers: TeamMember[];
@@ -81,6 +86,12 @@ export interface TeamContextValue {
   addTeamMember: (email: string, name: string) => Promise<TeamMember>;
   /** Remove a team member by ID. */
   removeTeamMember: (id: string) => Promise<void>;
+  /**
+   * Invite a new team member by email.
+   * Uses Supabase magic link (OTP) to send an invitation.
+   * Note: For true admin invites, a Supabase Edge Function would be needed.
+   */
+  inviteTeamMember: (email: string, name: string) => Promise<InviteResult>;
   /** Manually refetch the team members list. */
   refetch: () => Promise<void>;
 }
@@ -258,6 +269,102 @@ export function TeamProvider({ children }: TeamProviderProps) {
   }, []);
 
   /**
+   * Invite a new team member by email using Supabase magic link (OTP).
+   *
+   * This approach sends a magic link to the user's email. When they click it,
+   * they'll be authenticated and can set up their account.
+   *
+   * Note: For true admin invites (supabase.auth.admin.inviteUserByEmail),
+   * you would need a Supabase Edge Function since the admin API cannot be
+   * called from the client-side for security reasons.
+   *
+   * The invited user's team_member record will be created when they complete
+   * the sign-up process through the magic link.
+   */
+  const inviteTeamMember = useCallback(
+    async (email: string, name: string): Promise<InviteResult> => {
+      try {
+        // First, check if a team member with this email already exists
+        const { data: existingMember } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('email', email)
+          .single();
+
+        if (existingMember) {
+          return {
+            success: false,
+            message: 'A team member with this email already exists.',
+          };
+        }
+
+        // Create a pending invitation record in team_members
+        // This creates a placeholder that will be linked when the user accepts
+        const initials = generateInitials(name);
+        const avatarColor = generateAvatarColor(email);
+
+        const { error: insertError } = await supabase
+          .from('team_members')
+          .insert({
+            email,
+            name,
+            initials,
+            avatar_color: avatarColor,
+            user_id: null, // Will be populated when user accepts invite
+          });
+
+        if (insertError) {
+          // Handle unique constraint violations
+          if (insertError.code === '23505') {
+            return {
+              success: false,
+              message: 'A team member with this email already exists.',
+            };
+          }
+          throw new Error(insertError.message);
+        }
+
+        // Send magic link invitation email
+        // The user will receive an email with a link to sign in/up
+        const { error: otpError } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}`,
+            // Include metadata that can be used during signup
+            data: {
+              invited_name: name,
+            },
+          },
+        });
+
+        if (otpError) {
+          // If OTP fails, we should remove the pending team member record
+          await supabase
+            .from('team_members')
+            .delete()
+            .eq('email', email)
+            .is('user_id', null);
+
+          throw new Error(otpError.message);
+        }
+
+        return {
+          success: true,
+          message: `Invitation sent to ${email}. They will receive an email with a link to join the team.`,
+        };
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to send invitation';
+        return {
+          success: false,
+          message: errorMessage,
+        };
+      }
+    },
+    []
+  );
+
+  /**
    * Manually refetch team members.
    */
   const refetch = useCallback(async (): Promise<void> => {
@@ -273,9 +380,10 @@ export function TeamProvider({ children }: TeamProviderProps) {
       getTeamMember,
       addTeamMember,
       removeTeamMember,
+      inviteTeamMember,
       refetch,
     }),
-    [teamMembers, isLoading, error, getTeamMember, addTeamMember, removeTeamMember, refetch]
+    [teamMembers, isLoading, error, getTeamMember, addTeamMember, removeTeamMember, inviteTeamMember, refetch]
   );
 
   return <TeamContext.Provider value={value}>{children}</TeamContext.Provider>;

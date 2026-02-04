@@ -6,9 +6,13 @@ import { toISODateString } from '../utils/date';
 
 export type ViewMode = 'kanban' | 'month' | 'week' | 'day';
 
-interface ModalState {
+interface TaskModalState {
   isOpen: boolean;
   taskId: string | null; // null for new task, id for edit
+}
+
+interface InviteModalState {
+  isOpen: boolean;
 }
 
 interface UIContextValue {
@@ -26,9 +30,12 @@ interface UIContextValue {
    * stored internally as an ISO string to prevent mutation issues.
    */
   setSelectedDate: (date: Date) => void;
-  taskModal: ModalState;
+  taskModal: TaskModalState;
   openTaskModal: (taskId?: string | null) => void;
   closeTaskModal: () => void;
+  inviteModal: InviteModalState;
+  openInviteModal: () => void;
+  closeInviteModal: () => void;
   sidebarOpen: boolean;
   toggleSidebar: () => void;
 }
@@ -41,7 +48,8 @@ export function UIProvider({ children }: { children: ReactNode }) {
   // This ensures React's change detection works correctly and prevents
   // accidental mutations by consumers.
   const [selectedDateISO, setSelectedDateISO] = useState<string>(toISODateString(new Date()));
-  const [taskModal, setTaskModal] = useState<ModalState>({ isOpen: false, taskId: null });
+  const [taskModal, setTaskModal] = useState<TaskModalState>({ isOpen: false, taskId: null });
+  const [inviteModal, setInviteModal] = useState<InviteModalState>({ isOpen: false });
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Convert ISO string to Date object for consumers.
@@ -61,6 +69,14 @@ export function UIProvider({ children }: { children: ReactNode }) {
     setTaskModal({ isOpen: false, taskId: null });
   }, []);
 
+  const openInviteModal = useCallback(() => {
+    setInviteModal({ isOpen: true });
+  }, []);
+
+  const closeInviteModal = useCallback(() => {
+    setInviteModal({ isOpen: false });
+  }, []);
+
   const toggleSidebar = useCallback(() => {
     setSidebarOpen(prev => !prev);
   }, []);
@@ -73,9 +89,12 @@ export function UIProvider({ children }: { children: ReactNode }) {
     taskModal,
     openTaskModal,
     closeTaskModal,
+    inviteModal,
+    openInviteModal,
+    closeInviteModal,
     sidebarOpen,
     toggleSidebar,
-  }), [viewMode, selectedDate, setSelectedDate, taskModal, openTaskModal, closeTaskModal, sidebarOpen, toggleSidebar]);
+  }), [viewMode, selectedDate, setSelectedDate, taskModal, openTaskModal, closeTaskModal, inviteModal, openInviteModal, closeInviteModal, sidebarOpen, toggleSidebar]);
 
   return (
     <UIContext.Provider value={value}>

@@ -87,6 +87,35 @@
   gap: var(--space-md);
 }
 
+.inviteButton {
+  background: var(--brand-cyan);
+  color: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--nb-shadow);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.inviteButton:hover {
+  background: var(--brand-cyan-light);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-hover);
+}
+
+.inviteButton:focus-visible {
+  outline: 2px solid var(--color-white);
+  outline-offset: 2px;
+}
+
 .addButton {
   background: var(--color-black);
   color: var(--color-white);
@@ -150,6 +179,11 @@
 
   .addButton {
     padding: var(--space-xs) var(--space-md);
+    font-size: 0.75rem;
+  }
+
+  .inviteButton {
+    padding: var(--space-xs) var(--space-sm);
     font-size: 0.75rem;
   }
 }

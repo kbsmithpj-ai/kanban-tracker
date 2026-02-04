@@ -1,0 +1,98 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+}
+
+/* Status message container */
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.message.success {
+  background: var(--color-completed-bg);
+  border-color: var(--color-completed);
+  color: var(--brand-green-dark);
+}
+
+.message.error {
+  background: var(--color-past-due-bg);
+  border-color: var(--color-past-due);
+  color: #b91c1c;
+}
+
+.messageIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.message.success .messageIcon {
+  background: var(--color-completed);
+  color: var(--color-white);
+}
+
+.message.error .messageIcon {
+  background: var(--color-past-due);
+  color: var(--color-white);
+}
+
+/* Note styling */
+.note {
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  background: var(--color-gray-100);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--nb-radius);
+  border: 1px solid var(--color-gray-200);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.note strong {
+  color: var(--color-gray-700);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}

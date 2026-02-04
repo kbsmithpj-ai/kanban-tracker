@@ -1,6 +1,7 @@
 import { TaskProvider, FilterProvider, UIProvider, TeamProvider, AuthProvider, useAuth } from './context';
 import { Header, Sidebar, MainContent } from './components/layout';
 import { TaskModal } from './components/task';
+import { InviteModal } from './components/team';
 import { LoginPage } from './components/auth';
 import './index.css';
 
@@ -47,6 +48,7 @@ function AppLayout() {
         <MainContent />
       </div>
       <TaskModal />
+      <InviteModal />
     </div>
   );
 }
