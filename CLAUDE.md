@@ -36,12 +36,15 @@ The app uses **Supabase** for authentication, database, and real-time sync.
 **Database Tables:**
 - `team_members` - User profiles linked to auth.users (id, user_id, name, initials, avatar_color, email, is_admin)
 - `tasks` - Task data (id, title, description, status, category, priority, assignee_id, due_date, order)
+- `error_logs` - Error logging for debugging (id, user_id, severity, message, context, stack_trace, url, user_agent, created_at)
 
 **Row Level Security (RLS):**
 - Team members can view/create/update/delete tasks
 - Team members can view all team members
 - Admins can manage team members
 - Users can create their own team_member record on signup
+- All authenticated users can insert error logs
+- Only admins can view error logs
 
 **Supabase URL Configuration** (Authentication → URL Configuration):
 - Site URL: `https://kanban-tracker-six.vercel.app`
@@ -62,7 +65,7 @@ Six React Contexts manage application state:
 - **TeamContext** (`src/context/TeamContext.tsx`): Team members list with real-time sync from Supabase. Includes `inviteTeamMember()` for admin invitations.
 - **TaskContext** (`src/context/TaskContext.tsx`): Task CRUD, drag-drop reordering, auto-detection of past-due status. Persists to Supabase with real-time sync. Uses optimistic updates with rollback on failure.
 - **FilterContext** (`src/context/FilterContext.tsx`): Filter state (assignee, categories, statuses, search). Persists to localStorage.
-- **UIContext** (`src/context/UIContext.tsx`): View mode (kanban/month/week/day), selected date, modal state (task modal, invite modal), sidebar toggle. In-memory only.
+- **UIContext** (`src/context/UIContext.tsx`): View mode (kanban/month/week/day), selected date, modal state (task modal, invite modal, error log modal), sidebar toggle. In-memory only.
 - **ToastContext** (`src/context/ToastContext.tsx`): Toast notification system for showing success/error messages. Used for task operation feedback.
 
 Access contexts via hooks: `useAuth()`, `useTeam()`, `useTasks()`, `useFilters()`, `useUI()`, `useToast()`.
@@ -104,12 +107,13 @@ Past-due status is computed automatically via `getEffectiveStatus()` when a task
 ### Component Organization
 ```
 src/components/
+├── admin/      # ErrorLogModal (admin-only error log viewer)
 ├── auth/       # LoginPage (login, signup, forgot-password, reset-password modes)
-├── common/     # Button, Input, Select, Modal, Avatar, Badge, Toast
+├── common/     # Button, Input, Select, Modal, Avatar, Badge, Toast, ErrorBoundary
 ├── kanban/     # KanbanBoard, KanbanColumn, TaskCard
 ├── calendar/   # CalendarHeader, MonthView, WeekView, DayView
 ├── filters/    # FilterBar, CategoryFilter, StatusFilter, AssigneeFilter, SearchFilter
-├── layout/     # Header (with Invite button for admins), Sidebar, MainContent
+├── layout/     # Header (with Invite and Errors buttons for admins), Sidebar, MainContent
 ├── task/       # TaskForm, TaskModal
 └── team/       # InviteModal
 ```
@@ -130,6 +134,26 @@ The app uses a toast notification system to provide feedback for operations:
 - If Supabase returns an error, the change is rolled back and an error toast is shown
 - TaskModal stays open on failure so users can retry
 - Prevents silent failures (e.g., RLS rejecting inserts for unlinked users)
+
+### Error Logging System
+
+The app includes a persistent error logging system for debugging production issues:
+
+**Error Logger Utility** (`src/utils/errorLogger.ts`):
+- `logError(message, options)` - Fire-and-forget logging to `error_logs` table
+- `logInfo()`, `logWarning()`, `logCritical()` - Convenience wrappers
+- Auto-captures: user ID, browser URL, user agent, stack trace
+
+**Integration Points:**
+- TaskContext: addTask, updateTask, deleteTask, moveTask, reorderTasks
+- AuthContext: session errors, team member fetch/link errors, signup errors
+- TeamContext: fetchTeamMembers, addTeamMember, removeTeamMember, inviteTeamMember
+- ErrorBoundary: Catches uncaught React errors and logs them as critical
+
+**Admin Error Log Viewer:**
+- Access via red "Errors" button in Header (admin-only)
+- Filter by severity (info/warning/error/critical) and date range
+- Expandable rows show full context JSON and stack traces
 
 ### Styling
 - **Neo-brutalism design system** defined in `src/styles/neo-brutalism.css`
