@@ -56,15 +56,16 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 ### State Management
 
-Five React Contexts manage application state:
+Six React Contexts manage application state:
 
-- **AuthContext** (`src/context/AuthContext.tsx`): Authentication state, sign in/up/out, password reset/recovery, current user and team member profile.
+- **AuthContext** (`src/context/AuthContext.tsx`): Authentication state, sign in/up/out, password reset/recovery, current user and team member profile. Auto-links pending team_member records on sign-in.
 - **TeamContext** (`src/context/TeamContext.tsx`): Team members list with real-time sync from Supabase. Includes `inviteTeamMember()` for admin invitations.
-- **TaskContext** (`src/context/TaskContext.tsx`): Task CRUD, drag-drop reordering, auto-detection of past-due status. Persists to Supabase with real-time sync.
+- **TaskContext** (`src/context/TaskContext.tsx`): Task CRUD, drag-drop reordering, auto-detection of past-due status. Persists to Supabase with real-time sync. Uses optimistic updates with rollback on failure.
 - **FilterContext** (`src/context/FilterContext.tsx`): Filter state (assignee, categories, statuses, search). Persists to localStorage.
 - **UIContext** (`src/context/UIContext.tsx`): View mode (kanban/month/week/day), selected date, modal state (task modal, invite modal), sidebar toggle. In-memory only.
+- **ToastContext** (`src/context/ToastContext.tsx`): Toast notification system for showing success/error messages. Used for task operation feedback.
 
-Access contexts via hooks: `useAuth()`, `useTeam()`, `useTasks()`, `useFilters()`, `useUI()`.
+Access contexts via hooks: `useAuth()`, `useTeam()`, `useTasks()`, `useFilters()`, `useUI()`, `useToast()`.
 
 ### Data Flow
 1. `AuthProvider` wraps the app and manages authentication state
@@ -97,13 +98,14 @@ Past-due status is computed automatically via `getEffectiveStatus()` when a task
 1. Admin clicks "Invite" button in header → InviteModal opens
 2. Enter email and name → sends magic link via `supabase.auth.signInWithOtp()`
 3. Creates pending `team_member` record with `user_id: null`
-4. Invited user clicks link to complete signup
+4. Invited user clicks link → AuthContext auto-links pending record to their `user_id`
+5. User is now a full team member with RLS access to create/view tasks
 
 ### Component Organization
 ```
 src/components/
 ├── auth/       # LoginPage (login, signup, forgot-password, reset-password modes)
-├── common/     # Button, Input, Select, Modal, Avatar, Badge
+├── common/     # Button, Input, Select, Modal, Avatar, Badge, Toast
 ├── kanban/     # KanbanBoard, KanbanColumn, TaskCard
 ├── calendar/   # CalendarHeader, MonthView, WeekView, DayView
 ├── filters/    # FilterBar, CategoryFilter, StatusFilter, AssigneeFilter, SearchFilter
@@ -113,6 +115,21 @@ src/components/
 ```
 
 Each component has a folder with `ComponentName.tsx`, `ComponentName.module.css`, and `index.ts` barrel export.
+
+### Error Handling & Toast Notifications
+
+The app uses a toast notification system to provide feedback for operations:
+
+- **ToastContext** provides `showToast()`, `showError()`, `showSuccess()` functions
+- **Toast component** displays notifications in top-right corner
+- **Variants**: error (red), success (green), warning (gold), info (cyan)
+- **Auto-dismiss**: Errors after 8s, success/info after 5s
+
+**Task operations with error handling:**
+- All task CRUD operations use optimistic updates (show changes immediately)
+- If Supabase returns an error, the change is rolled back and an error toast is shown
+- TaskModal stays open on failure so users can retry
+- Prevents silent failures (e.g., RLS rejecting inserts for unlinked users)
 
 ### Styling
 - **Neo-brutalism design system** defined in `src/styles/neo-brutalism.css`
