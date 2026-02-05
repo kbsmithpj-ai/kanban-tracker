@@ -15,6 +15,10 @@ interface InviteModalState {
   isOpen: boolean;
 }
 
+interface ErrorLogModalState {
+  isOpen: boolean;
+}
+
 interface UIContextValue {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
@@ -36,6 +40,9 @@ interface UIContextValue {
   inviteModal: InviteModalState;
   openInviteModal: () => void;
   closeInviteModal: () => void;
+  errorLogModal: ErrorLogModalState;
+  openErrorLogModal: () => void;
+  closeErrorLogModal: () => void;
   sidebarOpen: boolean;
   toggleSidebar: () => void;
 }
@@ -50,6 +57,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [selectedDateISO, setSelectedDateISO] = useState<string>(toISODateString(new Date()));
   const [taskModal, setTaskModal] = useState<TaskModalState>({ isOpen: false, taskId: null });
   const [inviteModal, setInviteModal] = useState<InviteModalState>({ isOpen: false });
+  const [errorLogModal, setErrorLogModal] = useState<ErrorLogModalState>({ isOpen: false });
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Convert ISO string to Date object for consumers.
@@ -77,6 +85,14 @@ export function UIProvider({ children }: { children: ReactNode }) {
     setInviteModal({ isOpen: false });
   }, []);
 
+  const openErrorLogModal = useCallback(() => {
+    setErrorLogModal({ isOpen: true });
+  }, []);
+
+  const closeErrorLogModal = useCallback(() => {
+    setErrorLogModal({ isOpen: false });
+  }, []);
+
   const toggleSidebar = useCallback(() => {
     setSidebarOpen(prev => !prev);
   }, []);
@@ -92,9 +108,12 @@ export function UIProvider({ children }: { children: ReactNode }) {
     inviteModal,
     openInviteModal,
     closeInviteModal,
+    errorLogModal,
+    openErrorLogModal,
+    closeErrorLogModal,
     sidebarOpen,
     toggleSidebar,
-  }), [viewMode, selectedDate, setSelectedDate, taskModal, openTaskModal, closeTaskModal, inviteModal, openInviteModal, closeInviteModal, sidebarOpen, toggleSidebar]);
+  }), [viewMode, selectedDate, setSelectedDate, taskModal, openTaskModal, closeTaskModal, inviteModal, openInviteModal, closeInviteModal, errorLogModal, openErrorLogModal, closeErrorLogModal, sidebarOpen, toggleSidebar]);
 
   return (
     <UIContext.Provider value={value}>

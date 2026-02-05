@@ -11,7 +11,7 @@ const views: { id: ViewMode; label: string }[] = [
 ];
 
 export function Header() {
-  const { viewMode, setViewMode, openTaskModal, openInviteModal } = useUI();
+  const { viewMode, setViewMode, openTaskModal, openInviteModal, openErrorLogModal } = useUI();
   const { isAdmin } = useAuth();
 
   return (
@@ -39,6 +39,15 @@ export function Header() {
       </nav>
 
       <div className={styles.actions}>
+        {isAdmin && (
+          <button
+            className={styles.errorLogsButton}
+            onClick={openErrorLogModal}
+            aria-label="View error logs"
+          >
+            <span aria-hidden="true">&#9888;</span> Errors
+          </button>
+        )}
         {isAdmin && (
           <button
             className={styles.inviteButton}

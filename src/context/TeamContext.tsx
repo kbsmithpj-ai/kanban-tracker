@@ -13,6 +13,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { DbTeamMember } from '../types/database';
 import type { TeamMember } from '../types/team';
+import { logError } from '../utils/errorLogger';
 
 /**
  * Predefined avatar colors for new team members.
@@ -129,6 +130,10 @@ export function TeamProvider({ children }: TeamProviderProps) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch team members';
       setError(new Error(errorMessage));
       console.error('TeamContext: Error fetching team members:', err);
+      logError('Failed to fetch team members', {
+        error: err,
+        context: { operation: 'fetchTeamMembers' },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -246,6 +251,10 @@ export function TeamProvider({ children }: TeamProviderProps) {
         .single();
 
       if (insertError) {
+        logError('Failed to add team member', {
+          error: insertError,
+          context: { operation: 'addTeamMember', email, name },
+        });
         throw new Error(insertError.message);
       }
 
@@ -264,6 +273,10 @@ export function TeamProvider({ children }: TeamProviderProps) {
       .eq('id', id);
 
     if (deleteError) {
+      logError('Failed to remove team member', {
+        error: deleteError,
+        context: { operation: 'removeTeamMember', memberId: id },
+      });
       throw new Error(deleteError.message);
     }
   }, []);
@@ -355,6 +368,10 @@ export function TeamProvider({ children }: TeamProviderProps) {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to send invitation';
+        logError('Failed to invite team member', {
+          error: err,
+          context: { operation: 'inviteTeamMember', email, name },
+        });
         return {
           success: false,
           message: errorMessage,

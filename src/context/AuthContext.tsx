@@ -5,6 +5,7 @@ import type { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { DbTeamMember } from '../types/database';
 import { withTimeout, clearAuthState } from '../utils/recovery';
+import { logError } from '../utils/errorLogger';
 
 /** Timeout for session initialization (5 seconds) */
 const SESSION_TIMEOUT_MS = 5000;
@@ -130,6 +131,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       // Timeout or network error
       console.error('Team member fetch failed:', error);
+      logError('Team member fetch failed', {
+        error,
+        context: { operation: 'fetchTeamMember', userId },
+      });
       throw error; // Re-throw to allow upstream handling
     }
   }, []);
@@ -174,6 +179,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return updatedMember as DbTeamMember;
     } catch (error) {
       console.error('Error linking pending team member:', error);
+      logError('Error linking pending team member', {
+        error,
+        context: { operation: 'linkPendingTeamMember', userId },
+      });
       return null;
     }
   }, []);
@@ -279,6 +288,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Session fetch timed out - likely corrupted state or network issue
           // Clear auth state and show error
           console.warn('Session initialization timed out, clearing auth state');
+          logError('Auth initialization timed out', {
+            error,
+            context: { operation: 'initializeAuth', isTimeout: true },
+          });
           try {
             await clearAuthState();
           } catch {
@@ -287,6 +300,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setAuthError('Connection timed out. Please check your internet connection and try again.');
         } else {
           // Other error - clear state and show generic error
+          logError('Auth initialization failed', {
+            error,
+            context: { operation: 'initializeAuth', isTimeout: false },
+          });
           try {
             await clearAuthState();
           } catch {
@@ -344,6 +361,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           } catch (error) {
             // Team member fetch failed, but user is still authenticated
             console.warn('Failed to fetch team member on auth change:', error);
+            logError('Failed to fetch team member on auth state change', {
+              error,
+              context: { operation: 'onAuthStateChange', userId: currentSession.user.id },
+            });
             setTeamMember(null);
           }
         } else {
@@ -450,6 +471,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     if (teamError) {
       console.error('Failed to create team member record:', teamError);
+      logError('Failed to create team member record during signup', {
+        error: teamError,
+        context: { operation: 'signUp', userId: data.user.id },
+      });
       // The auth user was created, but team member creation failed.
       // In a production system, you might want to handle this more gracefully.
       return {

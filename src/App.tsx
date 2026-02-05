@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TaskProvider, FilterProvider, UIProvider, TeamProvider, AuthProvider, ToastProvider, useAuth } from './context';
+import { TaskProvider, FilterProvider, UIProvider, TeamProvider, AuthProvider, ToastProvider, useAuth, useUI } from './context';
 import { Header, Sidebar, MainContent } from './components/layout';
 import { TaskModal } from './components/task';
 import { InviteModal } from './components/team';
 import { LoginPage } from './components/auth';
 import { ToastContainer } from './components/common/Toast';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { ErrorLogModal } from './components/admin';
 import { clearAllStateAndReload } from './utils/recovery';
 import './index.css';
 
@@ -135,6 +137,8 @@ function LoadingScreen({ showTimeoutError, errorMessage, onRetry }: LoadingScree
 }
 
 function AppLayout() {
+  const { errorLogModal, closeErrorLogModal } = useUI();
+
   return (
     <div style={{
       display: 'flex',
@@ -154,6 +158,7 @@ function AppLayout() {
       <TaskModal />
       <InviteModal />
       <ToastContainer />
+      <ErrorLogModal isOpen={errorLogModal.isOpen} onClose={closeErrorLogModal} />
     </div>
   );
 }
@@ -241,13 +246,15 @@ function AuthenticatedApp() {
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <UIProvider>
-          <AuthenticatedApp />
-        </UIProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ToastProvider>
+          <UIProvider>
+            <AuthenticatedApp />
+          </UIProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

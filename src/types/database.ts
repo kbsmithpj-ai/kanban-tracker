@@ -121,3 +121,36 @@ export type DbTeamMember = Database['public']['Tables']['team_members']['Row'];
  * Type alias for a task row from the database.
  */
 export type DbTask = Database['public']['Tables']['tasks']['Row'];
+
+/**
+ * Error log severity levels.
+ */
+export type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
+
+/**
+ * Error log row from the database.
+ */
+export interface DbErrorLog {
+  id: string;
+  user_id: string | null;
+  severity: ErrorSeverity;
+  message: string;
+  context: Record<string, unknown>;
+  stack_trace: string | null;
+  url: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+/**
+ * Insert type for error logs.
+ */
+export interface DbErrorLogInsert {
+  user_id?: string | null;
+  severity?: ErrorSeverity;
+  message: string;
+  context?: Record<string, unknown>;
+  stack_trace?: string | null;
+  url?: string | null;
+  user_agent?: string | null;
+}

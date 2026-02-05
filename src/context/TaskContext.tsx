@@ -6,6 +6,7 @@ import type { Task, TaskStatus } from '../types/task';
 import type { Database, TaskStatus as DbTaskStatus } from '../types/database';
 import { isPastDue } from '../utils/date';
 import { supabase } from '../lib/supabase';
+import { logError } from '../utils/errorLogger';
 
 type DbTask = Database['public']['Tables']['tasks']['Row'];
 type DbTaskInsert = Database['public']['Tables']['tasks']['Insert'];
@@ -95,6 +96,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       const message = err instanceof Error ? err.message : 'Failed to fetch tasks';
       setError(message);
       console.error('Failed to fetch tasks:', err);
+      logError('Failed to fetch tasks', { error: err, context: { operation: 'fetchTasks' } });
     } finally {
       setIsLoading(false);
     }
@@ -163,6 +165,13 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         setTasks(prev => prev.filter(t => t.id !== tempId));
         const message = err instanceof Error ? err.message : 'Failed to add task';
         console.error('Failed to add task:', err);
+        logError('Failed to add task', {
+          error: err,
+          context: {
+            operation: 'addTask',
+            taskData: { title: taskData.title, status: taskData.status, category: taskData.category },
+          },
+        });
         throw new Error(message);
       }
     },
@@ -212,6 +221,14 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         setTasks(prev => prev.map(t => t.id === id ? originalTask : t));
         const message = err instanceof Error ? err.message : 'Failed to update task';
         console.error('Failed to update task:', err);
+        logError('Failed to update task', {
+          error: err,
+          context: {
+            operation: 'updateTask',
+            taskId: id,
+            updates: Object.keys(updates),
+          },
+        });
         throw new Error(message);
       }
     },
@@ -239,6 +256,13 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         setTasks(originalTasks);
         const message = err instanceof Error ? err.message : 'Failed to delete task';
         console.error('Failed to delete task:', err);
+        logError('Failed to delete task', {
+          error: err,
+          context: {
+            operation: 'deleteTask',
+            taskId: id,
+          },
+        });
         throw new Error(message);
       }
     },
@@ -306,6 +330,15 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         setTasks(originalTasks);
         const message = err instanceof Error ? err.message : 'Failed to move task';
         console.error('Failed to move task:', err);
+        logError('Failed to move task', {
+          error: err,
+          context: {
+            operation: 'moveTask',
+            taskId: id,
+            newStatus,
+            newOrder,
+          },
+        });
         throw new Error(message);
       }
     },
@@ -367,6 +400,14 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         setTasks(originalTasks);
         const message = err instanceof Error ? err.message : 'Failed to reorder tasks';
         console.error('Failed to reorder tasks:', err);
+        logError('Failed to reorder tasks', {
+          error: err,
+          context: {
+            operation: 'reorderTasks',
+            taskId,
+            newOrder,
+          },
+        });
         throw new Error(message);
       }
     },

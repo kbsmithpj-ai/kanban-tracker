@@ -1,0 +1,131 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: var(--space-lg);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
+  padding: var(--space-lg);
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--space-md);
+  background: var(--color-past-due);
+  border: var(--nb-border);
+  border-radius: 50%;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  color: var(--color-white);
+}
+
+.title {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand-navy);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.message {
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  margin: 0 0 var(--space-lg) 0;
+  line-height: 1.5;
+}
+
+.details {
+  width: 100%;
+  margin-bottom: var(--space-lg);
+  text-align: left;
+}
+
+.summary {
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-600);
+  cursor: pointer;
+  padding: var(--space-sm);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  background: var(--color-gray-100);
+}
+
+.summary:hover {
+  background: var(--color-gray-200);
+}
+
+.errorText {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--color-past-due);
+  background: var(--color-gray-100);
+  padding: var(--space-md);
+  margin: var(--space-sm) 0 0 0;
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.button {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-sm) var(--space-md);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--nb-shadow);
+  background: var(--brand-cyan);
+  color: var(--color-white);
+}
+
+.button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-hover);
+}
+
+.button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--nb-border-color);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 2px;
+}
