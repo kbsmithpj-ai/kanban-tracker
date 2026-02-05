@@ -135,6 +135,50 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   /**
+   * Links a pending team member record (created during invite) to the authenticated user.
+   * This is called when a user signs in but has no team_member record linked to their user_id.
+   * It looks for a pending record with matching email and updates it with the user_id.
+   */
+  const linkPendingTeamMember = useCallback(async (userId: string, email: string): Promise<DbTeamMember | null> => {
+    try {
+      // Look for a pending team_member record with this email but no user_id
+      const { data: pendingMember, error: findError } = await supabase
+        .from('team_members')
+        .select('*')
+        .eq('email', email)
+        .is('user_id', null)
+        .single();
+
+      if (findError || !pendingMember) {
+        // No pending record found - this is OK, user might need to sign up normally
+        return null;
+      }
+
+      // Cast to DbTeamMember for type safety
+      const pending = pendingMember as DbTeamMember;
+
+      // Found a pending record - link it to this user
+      const { data: updatedMember, error: updateError } = await supabase
+        .from('team_members')
+        .update({ user_id: userId })
+        .eq('id', pending.id)
+        .select('*')
+        .single();
+
+      if (updateError) {
+        console.error('Failed to link pending team member:', updateError);
+        return null;
+      }
+
+      console.log('Successfully linked pending team member record to user:', userId);
+      return updatedMember as DbTeamMember;
+    } catch (error) {
+      console.error('Error linking pending team member:', error);
+      return null;
+    }
+  }, []);
+
+  /**
    * Parse URL hash to detect password recovery tokens.
    * Supabase sends recovery tokens in URL hash: #access_token=...&type=recovery
    */
@@ -201,11 +245,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(currentSession.user);
 
           try {
-            const member = await fetchTeamMember(currentSession.user.id);
+            let member = await fetchTeamMember(currentSession.user.id);
+
+            // If no linked team member found, try to link a pending invite record
+            if (!member && currentSession.user.email) {
+              member = await linkPendingTeamMember(
+                currentSession.user.id,
+                currentSession.user.email
+              );
+            }
+
             if (mounted && currentAttempt === initAttemptRef.current) {
               setTeamMember(member);
-              // Note: member being null is OK - user might not have a team_member record yet
-              // (e.g., during invitation flow)
             }
           } catch (teamMemberError) {
             // Team member fetch failed (timeout or network error)
@@ -279,7 +330,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (currentSession?.user) {
           try {
-            const member = await fetchTeamMember(currentSession.user.id);
+            let member = await fetchTeamMember(currentSession.user.id);
+
+            // If no linked team member found, try to link a pending invite record
+            if (!member && currentSession.user.email) {
+              member = await linkPendingTeamMember(
+                currentSession.user.id,
+                currentSession.user.email
+              );
+            }
+
             setTeamMember(member);
           } catch (error) {
             // Team member fetch failed, but user is still authenticated
