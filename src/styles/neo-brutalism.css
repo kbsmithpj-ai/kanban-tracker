@@ -20,12 +20,12 @@
   --brand-gold-dark: #c49400;
 
   /* Core Neo-Brutalism Values */
-  --nb-border-width: 3px;
-  --nb-border-color: var(--brand-navy);
+  --nb-border-width: 2px;
+  --nb-border-color: var(--color-gray-400);
   --nb-border: var(--nb-border-width) solid var(--nb-border-color);
-  --nb-shadow-offset: 4px;
-  --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 var(--nb-border-color);
-  --nb-shadow-hover: 6px 6px 0 var(--nb-border-color);
+  --nb-shadow-offset: 3px;
+  --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 var(--color-gray-300);
+  --nb-shadow-hover: 4px 4px 0 var(--color-gray-300);
   --nb-radius: 8px;
 
   /* Typography */

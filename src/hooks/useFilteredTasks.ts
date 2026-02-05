@@ -47,12 +47,18 @@ export function useFilteredTasks() {
   // Pre-compute tasks by status for stable array references
   // This prevents unnecessary re-renders in child components that consume these arrays
   const tasksByStatus = useMemo<TasksByStatus>(() => {
-    const sortByOrder = (a: Task, b: Task) => a.order - b.order;
+    // Sort by due date (earliest first), tasks without due date go to bottom
+    const sortByDueDate = (a: Task, b: Task) => {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;  // a goes after b
+      if (!b.dueDate) return -1; // a goes before b
+      return a.dueDate.localeCompare(b.dueDate);
+    };
 
     const filterAndSort = (status: TaskStatus): Task[] =>
       filteredTasks
         .filter(task => getEffectiveStatus(task) === status)
-        .sort(sortByOrder);
+        .sort(sortByDueDate);
 
     return {
       'planning': filterAndSort('planning'),
