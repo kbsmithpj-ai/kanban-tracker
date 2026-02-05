@@ -141,3 +141,16 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+/* Accessibility utility class - visually hidden but accessible to screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -15,7 +15,7 @@ import type { TaskStatus } from '../../../types/task';
 import { STATUSES } from '../../../constants/statuses';
 import { useTasks } from '../../../hooks/useTasks';
 import { useFilteredTasks } from '../../../hooks/useFilteredTasks';
-import { useUI } from '../../../context';
+import { useUI, useToast } from '../../../context';
 import { KanbanColumn } from '../KanbanColumn';
 import styles from './KanbanBoard.module.css';
 
@@ -37,6 +37,7 @@ export function KanbanBoard() {
   const { moveTask, getTasksByStatus } = useTasks();
   const { tasksByStatus } = useFilteredTasks();
   const { openTaskModal } = useUI();
+  const { showError } = useToast();
 
   // Track when drag ends to suppress click events
   const dragEndTimeRef = useRef<number>(0);
@@ -55,7 +56,7 @@ export function KanbanBoard() {
     })
   );
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     // Record drag end time to suppress click events that fire immediately after
     dragEndTimeRef.current = Date.now();
 
@@ -69,24 +70,29 @@ export function KanbanBoard() {
     // Check if dropped on a column (status)
     const isColumn = STATUS_IDS.includes(overId as TaskStatus);
 
-    if (isColumn) {
-      // Dropped directly on a column - append to end of unfiltered task list
-      const newStatus = overId as TaskStatus;
-      const allTasksInColumn = getTasksByStatus(newStatus);
-      moveTask(taskId, newStatus, allTasksInColumn.length);
-    } else {
-      // Dropped on another task - find which column it belongs to
-      // Use unfiltered tasks to get correct insertion index
-      for (const status of STATUS_IDS) {
-        const allTasks = getTasksByStatus(status);
-        const overIndex = allTasks.findIndex(t => t.id === overId);
-        if (overIndex !== -1) {
-          moveTask(taskId, status, overIndex);
-          break;
+    try {
+      if (isColumn) {
+        // Dropped directly on a column - append to end of unfiltered task list
+        const newStatus = overId as TaskStatus;
+        const allTasksInColumn = getTasksByStatus(newStatus);
+        await moveTask(taskId, newStatus, allTasksInColumn.length);
+      } else {
+        // Dropped on another task - find which column it belongs to
+        // Use unfiltered tasks to get correct insertion index
+        for (const status of STATUS_IDS) {
+          const allTasks = getTasksByStatus(status);
+          const overIndex = allTasks.findIndex(t => t.id === overId);
+          if (overIndex !== -1) {
+            await moveTask(taskId, status, overIndex);
+            break;
+          }
         }
       }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      showError(`Failed to move task: ${message}`);
     }
-  }, [moveTask, getTasksByStatus]);
+  }, [moveTask, getTasksByStatus, showError]);
 
   const handleTaskClick = useCallback((taskId: string) => {
     // Suppress clicks that occur within 150ms of a drag ending

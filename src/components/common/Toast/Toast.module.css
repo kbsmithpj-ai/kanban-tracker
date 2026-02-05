@@ -1,0 +1,150 @@
+.toastContainer {
+  position: fixed;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--color-white);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  pointer-events: auto;
+  animation: slideIn 200ms ease-out;
+}
+
+.toast.exiting {
+  animation: slideOut 200ms ease-in forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Toast type variants */
+.error {
+  border-color: var(--color-past-due);
+  border-left-width: 6px;
+  background: var(--color-past-due-bg);
+}
+
+.error .icon {
+  color: var(--color-past-due);
+}
+
+.success {
+  border-color: var(--brand-green);
+  border-left-width: 6px;
+  background: var(--color-completed-bg);
+}
+
+.success .icon {
+  color: var(--brand-green);
+}
+
+.warning {
+  border-color: var(--brand-gold);
+  border-left-width: 6px;
+  background: var(--color-planning-bg);
+}
+
+.warning .icon {
+  color: var(--brand-gold-dark);
+}
+
+.info {
+  border-color: var(--brand-cyan);
+  border-left-width: 6px;
+  background: var(--color-in-progress-bg);
+}
+
+.info .icon {
+  color: var(--brand-cyan);
+}
+
+.icon {
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message {
+  color: var(--brand-navy);
+  font-weight: 500;
+  word-wrap: break-word;
+}
+
+.dismissButton {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0;
+  transition: all var(--transition-fast);
+}
+
+.dismissButton:hover {
+  background: var(--color-gray-200);
+  color: var(--brand-navy);
+}
+
+.dismissButton:focus {
+  outline: none;
+  border-color: var(--brand-cyan);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .toastContainer {
+    top: var(--space-sm);
+    right: var(--space-sm);
+    left: var(--space-sm);
+    max-width: none;
+  }
+}

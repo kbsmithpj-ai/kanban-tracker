@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TaskProvider, FilterProvider, UIProvider, TeamProvider, AuthProvider, useAuth } from './context';
+import { TaskProvider, FilterProvider, UIProvider, TeamProvider, AuthProvider, ToastProvider, useAuth } from './context';
 import { Header, Sidebar, MainContent } from './components/layout';
 import { TaskModal } from './components/task';
 import { InviteModal } from './components/team';
 import { LoginPage } from './components/auth';
+import { ToastContainer } from './components/common/Toast';
 import { clearAllStateAndReload } from './utils/recovery';
 import './index.css';
 
@@ -152,6 +153,7 @@ function AppLayout() {
       </div>
       <TaskModal />
       <InviteModal />
+      <ToastContainer />
     </div>
   );
 }
@@ -240,9 +242,11 @@ function AuthenticatedApp() {
 function App() {
   return (
     <AuthProvider>
-      <UIProvider>
-        <AuthenticatedApp />
-      </UIProvider>
+      <ToastProvider>
+        <UIProvider>
+          <AuthenticatedApp />
+        </UIProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }
