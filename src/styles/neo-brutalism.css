@@ -70,6 +70,7 @@
   --color-priority-medium: var(--brand-gold);
   --color-priority-high: #e07040;
   --color-priority-urgent: #e05252;
+  --color-status-urgent: var(--color-past-due);
 
   /* Neutral Colors - Navy-tinted for brand cohesion */
   --color-white: #FFFFFF;
@@ -163,6 +164,7 @@
   --color-priority-medium: #f5c020;
   --color-priority-high: #f08050;
   --color-priority-urgent: #f06060;
+  --color-status-urgent: var(--color-past-due);
 
   /* Neutral Colors - Inverted for dark mode */
   --color-white: #1a1a2e;

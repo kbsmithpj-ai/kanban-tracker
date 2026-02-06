@@ -9,10 +9,10 @@ export interface StatusConfig {
 
 // Confluence Genetics brand-aligned status colors
 export const STATUSES: StatusConfig[] = [
-  { id: 'planning', label: 'Planning', primaryColor: '#f5b800', backgroundColor: '#fef6de' },
-  { id: 'in-progress', label: 'In Progress', primaryColor: '#00a8e8', backgroundColor: '#e6f7fc' },
-  { id: 'completed', label: 'Completed', primaryColor: '#4cb944', backgroundColor: '#e8f5e6' },
-  { id: 'past-due', label: 'Past Due', primaryColor: '#e05252', backgroundColor: '#fce8e8' },
+  { id: 'planning', label: 'Planning', primaryColor: 'var(--color-planning)', backgroundColor: 'var(--color-planning-bg)' },
+  { id: 'in-progress', label: 'In Progress', primaryColor: 'var(--color-in-progress)', backgroundColor: 'var(--color-in-progress-bg)' },
+  { id: 'completed', label: 'Completed', primaryColor: 'var(--color-completed)', backgroundColor: 'var(--color-completed-bg)' },
+  { id: 'past-due', label: 'Past Due', primaryColor: 'var(--color-past-due)', backgroundColor: 'var(--color-past-due-bg)' },
 ];
 
 const VALID_STATUS_IDS = new Set<TaskStatus>(STATUSES.map(s => s.id));
@@ -23,8 +23,8 @@ export const isValidStatus = (id: string): id is TaskStatus =>
 const UNKNOWN_STATUS_CONFIG: StatusConfig = {
   id: 'planning' as TaskStatus,
   label: 'Unknown',
-  primaryColor: '#8e9bb0',
-  backgroundColor: '#f1f4f8',
+  primaryColor: 'var(--color-gray-400)',
+  backgroundColor: 'var(--color-gray-100)',
 };
 
 export const getStatusConfig = (id: TaskStatus): StatusConfig => {

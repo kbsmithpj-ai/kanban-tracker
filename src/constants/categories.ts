@@ -10,11 +10,11 @@ export interface CategoryConfig {
 
 // Confluence Genetics brand-aligned category colors
 export const CATEGORIES: CategoryConfig[] = [
-  { id: 'seed-pro', label: 'Seed Pro', primaryColor: '#00a8e8', backgroundColor: '#e6f7fc', borderColor: '#0088bc' },
-  { id: 'agronomy', label: 'Agronomy', primaryColor: '#4cb944', backgroundColor: '#e8f5e6', borderColor: '#3a9435' },
-  { id: 'sales', label: 'Sales', primaryColor: '#f5b800', backgroundColor: '#fef6de', borderColor: '#c49400' },
-  { id: 'testing', label: 'Testing', primaryColor: '#7c5cbf', backgroundColor: '#f0ebf8', borderColor: '#5b3d9e' },
-  { id: 'samples', label: 'Samples', primaryColor: '#e07040', backgroundColor: '#fce8e0', borderColor: '#b85530' },
+  { id: 'seed-pro', label: 'Seed Pro', primaryColor: 'var(--color-seed-pro)', backgroundColor: 'var(--color-seed-pro-bg)', borderColor: 'var(--color-seed-pro-border)' },
+  { id: 'agronomy', label: 'Agronomy', primaryColor: 'var(--color-agronomy)', backgroundColor: 'var(--color-agronomy-bg)', borderColor: 'var(--color-agronomy-border)' },
+  { id: 'sales', label: 'Sales', primaryColor: 'var(--color-sales)', backgroundColor: 'var(--color-sales-bg)', borderColor: 'var(--color-sales-border)' },
+  { id: 'testing', label: 'Testing', primaryColor: 'var(--color-testing)', backgroundColor: 'var(--color-testing-bg)', borderColor: 'var(--color-testing-border)' },
+  { id: 'samples', label: 'Samples', primaryColor: 'var(--color-samples)', backgroundColor: 'var(--color-samples-bg)', borderColor: 'var(--color-samples-border)' },
 ];
 
 const VALID_CATEGORY_IDS = new Set<TaskCategory>(CATEGORIES.map(c => c.id));
@@ -25,9 +25,9 @@ export const isValidCategory = (id: string): id is TaskCategory =>
 const UNKNOWN_CATEGORY_CONFIG: CategoryConfig = {
   id: 'seed-pro' as TaskCategory,
   label: 'Unknown',
-  primaryColor: '#8e9bb0',
-  backgroundColor: '#f1f4f8',
-  borderColor: '#5d6b82',
+  primaryColor: 'var(--color-gray-400)',
+  backgroundColor: 'var(--color-gray-100)',
+  borderColor: 'var(--color-gray-500)',
 };
 
 export const getCategoryConfig = (id: TaskCategory): CategoryConfig => {
