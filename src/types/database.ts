@@ -58,6 +58,7 @@ export interface Database {
           priority: TaskPriority;
           assignee_id: string | null;
           due_date: string | null;
+          completed_at: string | null;
           order: number;
           created_at: string;
           updated_at: string;
@@ -72,6 +73,7 @@ export interface Database {
           priority: TaskPriority;
           assignee_id?: string | null;
           due_date?: string | null;
+          completed_at?: string | null;
           order?: number;
           created_at?: string;
           updated_at?: string;
@@ -86,6 +88,7 @@ export interface Database {
           priority?: TaskPriority;
           assignee_id?: string | null;
           due_date?: string | null;
+          completed_at?: string | null;
           order?: number;
           created_at?: string;
           updated_at?: string;

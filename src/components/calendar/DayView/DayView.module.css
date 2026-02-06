@@ -79,6 +79,21 @@
   flex-shrink: 0;
 }
 
+.completedTask {
+  border-color: var(--color-completed);
+  box-shadow: 4px 4px 0 var(--color-completed);
+  background: var(--color-completed-bg);
+}
+
+.completedTitle {
+  text-decoration: line-through;
+}
+
+.checkmark {
+  color: var(--color-completed);
+  font-weight: 700;
+}
+
 .emptyState {
   text-align: center;
   padding: var(--space-2xl);

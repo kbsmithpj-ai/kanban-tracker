@@ -24,6 +24,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     priority: 'high',
     assigneeId: 'kyle',
     dueDate: getDueDate(7),
+    completedAt: null,
     order: 0,
   },
   {
@@ -34,6 +35,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     priority: 'urgent',
     assigneeId: 'austin',
     dueDate: getDueDate(3),
+    completedAt: null,
     order: 0,
   },
   {
@@ -44,6 +46,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     priority: 'medium',
     assigneeId: 'ryan',
     dueDate: getDueDate(-2),
+    completedAt: new Date().toISOString(),
     order: 0,
   },
   {
@@ -54,6 +57,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     priority: 'high',
     assigneeId: 'john',
     dueDate: getDueDate(5),
+    completedAt: null,
     order: 1,
   },
   {
@@ -64,6 +68,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     priority: 'urgent',
     assigneeId: 'kyle',
     dueDate: getDueDate(-1), // Past due!
+    completedAt: null,
     order: 1,
   },
   {
@@ -74,6 +79,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     priority: 'low',
     assigneeId: null,
     dueDate: getDueDate(14),
+    completedAt: null,
     order: 2,
   },
 ];

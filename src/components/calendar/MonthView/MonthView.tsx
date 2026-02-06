@@ -11,7 +11,9 @@ import {
 } from 'date-fns';
 import { useUI } from '../../../context';
 import { useFilteredTasks } from '../../../hooks/useFilteredTasks';
+import { useTasks } from '../../../hooks/useTasks';
 import { getCategoryConfig } from '../../../constants/categories';
+import { getCalendarDateKey } from '../../../utils/date';
 import type { Task } from '../../../types/task';
 import styles from './MonthView.module.css';
 
@@ -27,6 +29,7 @@ const MAX_VISIBLE_TASKS = 3;
 export function MonthView() {
   const { selectedDate, setSelectedDate, setViewMode, openTaskModal } = useUI();
   const { filteredTasks } = useFilteredTasks();
+  const { getEffectiveStatus } = useTasks();
 
   // Memoize today's date to avoid creating new Date objects for every calendar cell
   // This is only recalculated when the component re-renders (typically on user interaction)
@@ -42,11 +45,12 @@ export function MonthView() {
   }, [selectedDate]);
 
   // Group tasks by date for efficient lookup
+  // Completed tasks appear on their completion date; others on their due date
   const tasksByDate = useMemo(() => {
     const map = new Map<string, Task[]>();
     filteredTasks.forEach(task => {
-      if (task.dueDate) {
-        const dateKey = task.dueDate;
+      const dateKey = getCalendarDateKey(task);
+      if (dateKey) {
         if (!map.has(dateKey)) {
           map.set(dateKey, []);
         }
@@ -122,10 +126,15 @@ export function MonthView() {
               <div className={styles.taskList}>
                 {dayTasks.slice(0, MAX_VISIBLE_TASKS).map(task => {
                   const category = getCategoryConfig(task.category);
+                  const isCompleted = getEffectiveStatus(task) === 'completed';
+                  const taskClasses = [
+                    styles.taskItem,
+                    isCompleted && styles.completedTask,
+                  ].filter(Boolean).join(' ');
                   return (
                     <div
                       key={task.id}
-                      className={styles.taskItem}
+                      className={taskClasses}
                       style={{
                         backgroundColor: category.backgroundColor,
                         borderLeftColor: category.primaryColor,
@@ -134,9 +143,10 @@ export function MonthView() {
                       onKeyDown={(e) => handleTaskKeyDown(e, task.id)}
                       role="button"
                       tabIndex={0}
-                      aria-label={`Task: ${task.title}`}
+                      aria-label={`Task: ${task.title}${isCompleted ? ' (completed)' : ''}`}
                     >
-                      {task.title}
+                      {isCompleted && <span className={styles.checkmark} aria-hidden="true">&#10003;</span>}
+                      <span className={isCompleted ? styles.completedTitle : undefined}>{task.title}</span>
                     </div>
                   );
                 })}

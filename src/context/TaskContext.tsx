@@ -16,7 +16,7 @@ interface TaskContextValue {
   tasks: Task[];
   isLoading: boolean;
   error: string | null;
-  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'order'>) => Promise<Task>;
+  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'order' | 'completedAt'>) => Promise<Task>;
   updateTask: (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   moveTask: (id: string, newStatus: TaskStatus, newOrder: number) => Promise<void>;
@@ -40,6 +40,7 @@ function dbToTask(row: DbTask): Task {
     priority: row.priority,
     assigneeId: row.assignee_id,
     dueDate: row.due_date,
+    completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     order: row.order,
@@ -51,7 +52,7 @@ function dbToTask(row: DbTask): Task {
  * Note: 'past-due' status is computed client-side and should never be stored.
  */
 function taskToDbInsert(
-  task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'order'>
+  task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'order' | 'completedAt'> & { completedAt?: string | null }
 ): DbTaskInsert {
   // Normalize past-due to planning since past-due is a computed status
   const dbStatus: DbTaskStatus = task.status === 'past-due' ? 'planning' : task.status;
@@ -64,6 +65,7 @@ function taskToDbInsert(
     priority: task.priority,
     assignee_id: task.assigneeId,
     due_date: task.dueDate,
+    completed_at: task.completedAt ?? null,
   };
 }
 
@@ -124,7 +126,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   }, [fetchTasks]);
 
   const addTask = useCallback(
-    async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'order'>): Promise<Task> => {
+    async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'order' | 'completedAt'>): Promise<Task> => {
       const tempId = nanoid();
       const now = new Date().toISOString();
 
@@ -137,6 +139,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       const optimisticTask: Task = {
         ...taskData,
         id: tempId,
+        completedAt: taskData.status === 'completed' ? now : null,
         createdAt: now,
         updatedAt: now,
         order: maxOrder + 1,
@@ -183,11 +186,23 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       const originalTask = tasks.find(t => t.id === id);
       if (!originalTask) return;
 
+      // Compute completedAt for status transitions
+      const now = new Date().toISOString();
+      const completedAtUpdate: Partial<Pick<Task, 'completedAt'>> = {};
+      if (updates.status !== undefined) {
+        const effectiveNewStatus = updates.status === 'past-due' ? originalTask.status : updates.status;
+        if (effectiveNewStatus === 'completed' && originalTask.status !== 'completed') {
+          completedAtUpdate.completedAt = now;
+        } else if (effectiveNewStatus !== 'completed' && originalTask.status === 'completed') {
+          completedAtUpdate.completedAt = null;
+        }
+      }
+
       // Optimistic update
       setTasks(prev =>
         prev.map(task =>
           task.id === id
-            ? { ...task, ...updates, updatedAt: new Date().toISOString() }
+            ? { ...task, ...updates, ...completedAtUpdate, updatedAt: now }
             : task
         )
       );
@@ -209,6 +224,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         if (updates.assigneeId !== undefined) dbUpdates.assignee_id = updates.assigneeId;
         if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
         if (updates.order !== undefined) dbUpdates.order = updates.order;
+        if (completedAtUpdate.completedAt !== undefined) dbUpdates.completed_at = completedAtUpdate.completedAt;
 
         const { error: updateError } = await supabase
           .from('tasks')
@@ -284,10 +300,19 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       // Normalize past-due to a storable status
       const dbStatus: DbTaskStatus = newStatus === 'past-due' ? 'planning' : newStatus as DbTaskStatus;
 
+      // Compute completedAt for status transition
+      const moveNow = new Date().toISOString();
+      let movedCompletedAt: string | null = taskToMove.completedAt;
+      if (dbStatus === 'completed' && taskToMove.status !== 'completed') {
+        movedCompletedAt = moveNow;
+      } else if (dbStatus !== 'completed' && taskToMove.status === 'completed') {
+        movedCompletedAt = null;
+      }
+
       // Insert at the new position and reorder
       const updatedTasksInStatus = [
         ...tasksInNewStatus.slice(0, newOrder),
-        { ...taskToMove, status: dbStatus, updatedAt: new Date().toISOString() },
+        { ...taskToMove, status: dbStatus, completedAt: movedCompletedAt, updatedAt: moveNow },
         ...tasksInNewStatus.slice(newOrder),
       ].map((t, idx) => ({ ...t, order: idx }));
 
@@ -319,6 +344,10 @@ export function TaskProvider({ children }: { children: ReactNode }) {
               status: task.status as DbTaskStatus,
               order: task.order,
             };
+            // Include completed_at for the moved task
+            if (task.id === id) {
+              updateData.completed_at = movedCompletedAt;
+            }
             return supabase
               .from('tasks')
               .update(updateData)

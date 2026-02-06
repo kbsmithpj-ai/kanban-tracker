@@ -8,7 +8,9 @@ import {
 } from 'date-fns';
 import { useUI } from '../../../context';
 import { useFilteredTasks } from '../../../hooks/useFilteredTasks';
+import { useTasks } from '../../../hooks/useTasks';
 import { getCategoryConfig } from '../../../constants/categories';
+import { getCalendarDateKey } from '../../../utils/date';
 import { Avatar } from '../../common/Avatar';
 import { Badge } from '../../common/Badge';
 import type { Task } from '../../../types/task';
@@ -23,6 +25,7 @@ import styles from './WeekView.module.css';
 export function WeekView() {
   const { selectedDate, setSelectedDate, setViewMode, openTaskModal } = useUI();
   const { filteredTasks } = useFilteredTasks();
+  const { getEffectiveStatus } = useTasks();
 
   // Generate array of 7 days for the week
   const weekDays = useMemo(() => {
@@ -32,11 +35,12 @@ export function WeekView() {
   }, [selectedDate]);
 
   // Group tasks by date for efficient lookup
+  // Completed tasks appear on their completion date; others on their due date
   const tasksByDate = useMemo(() => {
     const map = new Map<string, Task[]>();
     filteredTasks.forEach(task => {
-      if (task.dueDate) {
-        const dateKey = task.dueDate;
+      const dateKey = getCalendarDateKey(task);
+      if (dateKey) {
         if (!map.has(dateKey)) {
           map.set(dateKey, []);
         }
@@ -113,10 +117,15 @@ export function WeekView() {
               ) : (
                 dayTasks.map(task => {
                   const category = getCategoryConfig(task.category);
+                  const isCompleted = getEffectiveStatus(task) === 'completed';
+                  const cardClasses = [
+                    styles.taskCard,
+                    isCompleted && styles.completedTask,
+                  ].filter(Boolean).join(' ');
                   return (
                     <div
                       key={task.id}
-                      className={styles.taskCard}
+                      className={cardClasses}
                       style={{
                         borderLeftColor: category.primaryColor,
                         borderLeftWidth: '4px',
@@ -125,9 +134,12 @@ export function WeekView() {
                       onKeyDown={(e) => handleTaskKeyDown(e, task.id)}
                       role="button"
                       tabIndex={0}
-                      aria-label={`Task: ${task.title}, Category: ${category.label}`}
+                      aria-label={`Task: ${task.title}, Category: ${category.label}${isCompleted ? ' (completed)' : ''}`}
                     >
-                      <div className={styles.taskTitle}>{task.title}</div>
+                      <div className={isCompleted ? `${styles.taskTitle} ${styles.completedTitle}` : styles.taskTitle}>
+                        {isCompleted && <span className={styles.checkmark} aria-hidden="true">&#10003; </span>}
+                        {task.title}
+                      </div>
                       <div className={styles.taskMeta}>
                         <Badge
                           color={category.borderColor}

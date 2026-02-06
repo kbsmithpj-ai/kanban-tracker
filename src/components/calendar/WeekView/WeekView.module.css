@@ -117,6 +117,21 @@
   flex-wrap: wrap;
 }
 
+.completedTask {
+  border-color: var(--color-completed);
+  box-shadow: 2px 2px 0 var(--color-completed);
+  background: var(--color-completed-bg);
+}
+
+.completedTitle {
+  text-decoration: line-through;
+}
+
+.checkmark {
+  color: var(--color-completed);
+  font-weight: 700;
+}
+
 .emptyDay {
   color: var(--color-gray-400);
   font-family: var(--font-primary);

@@ -5,6 +5,7 @@ import { useFilteredTasks } from '../../../hooks/useFilteredTasks';
 import { useTasks } from '../../../hooks/useTasks';
 import { getCategoryConfig } from '../../../constants/categories';
 import { getStatusConfig } from '../../../constants/statuses';
+import { getCalendarDateKey } from '../../../utils/date';
 import { Avatar } from '../../common/Avatar';
 import { Badge } from '../../common/Badge';
 import styles from './DayView.module.css';
@@ -36,9 +37,10 @@ export function DayView() {
   const { getEffectiveStatus } = useTasks();
 
   // Filter tasks for the selected day
+  // Completed tasks appear on their completion date; others on their due date
   const dayTasks = useMemo(() => {
     const dateKey = format(selectedDate, 'yyyy-MM-dd');
-    return filteredTasks.filter(task => task.dueDate === dateKey);
+    return filteredTasks.filter(task => getCalendarDateKey(task) === dateKey);
   }, [selectedDate, filteredTasks]);
 
   const handleTaskClick = (taskId: string) => {
@@ -89,20 +91,28 @@ export function DayView() {
           const category = getCategoryConfig(task.category);
           const effectiveStatus = getEffectiveStatus(task);
           const status = getStatusConfig(effectiveStatus);
+          const isCompleted = effectiveStatus === 'completed';
+          const cardClasses = [
+            styles.taskCard,
+            isCompleted && styles.completedTask,
+          ].filter(Boolean).join(' ');
 
           return (
             <article
               key={task.id}
-              className={styles.taskCard}
+              className={cardClasses}
               style={{ borderLeftColor: category.primaryColor }}
               onClick={() => handleTaskClick(task.id)}
               onKeyDown={(e) => handleTaskKeyDown(e, task.id)}
               role="listitem"
               tabIndex={0}
-              aria-label={`Task: ${task.title}`}
+              aria-label={`Task: ${task.title}${isCompleted ? ' (completed)' : ''}`}
             >
               <div className={styles.taskHeader}>
-                <h3 className={styles.taskTitle}>{task.title}</h3>
+                <h3 className={isCompleted ? `${styles.taskTitle} ${styles.completedTitle}` : styles.taskTitle}>
+                  {isCompleted && <span className={styles.checkmark} aria-hidden="true">&#10003; </span>}
+                  {task.title}
+                </h3>
                 <div
                   className={styles.priority}
                   style={{ backgroundColor: priorityColors[task.priority] }}

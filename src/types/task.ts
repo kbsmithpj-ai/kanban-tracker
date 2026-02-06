@@ -11,6 +11,7 @@ export interface Task {
   priority: TaskPriority;
   assigneeId: string | null;
   dueDate: string | null; // ISO date string
+  completedAt: string | null; // ISO timestamp, set when task moves to completed
   createdAt: string;
   updatedAt: string;
   order: number;

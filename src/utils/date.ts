@@ -1,4 +1,5 @@
 import { format, parseISO, isBefore, startOfDay, isToday, isValid } from 'date-fns';
+import type { Task } from '../types/task';
 
 /**
  * Safely parses an ISO date string, returning null if parsing fails or the result is invalid.
@@ -82,4 +83,17 @@ export const normalizeDateString = (date: Date | string | null | undefined): str
 
   const parsed = safeParseISO(date);
   return parsed ? format(parsed, 'yyyy-MM-dd') : '';
+};
+
+/**
+ * Returns the date key a task should appear on in calendar views.
+ * Completed tasks display on their completion date (falling back to dueDate for legacy data).
+ * All other tasks display on their dueDate.
+ */
+export const getCalendarDateKey = (task: Task): string | null => {
+  if (task.status === 'completed') {
+    const completedDate = task.completedAt ? normalizeDateString(task.completedAt) : null;
+    return completedDate || task.dueDate;
+  }
+  return task.dueDate;
 };
