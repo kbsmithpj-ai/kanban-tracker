@@ -35,7 +35,7 @@ The app uses **Supabase** for authentication, database, and real-time sync.
 
 **Database Tables:**
 - `team_members` - User profiles linked to auth.users (id, user_id, name, initials, avatar_color, email, is_admin)
-- `tasks` - Task data (id, title, description, status, category, priority, assignee_id, due_date, order)
+- `tasks` - Task data (id, title, description, status, category, priority, assignee_id, due_date, completed_at, order)
 - `error_logs` - Error logging for debugging (id, user_id, severity, message, context, stack_trace, url, user_agent, created_at)
 
 **Row Level Security (RLS):**
@@ -63,7 +63,7 @@ Six React Contexts manage application state:
 
 - **AuthContext** (`src/context/AuthContext.tsx`): Authentication state, sign in/up/out, password reset/recovery, current user and team member profile. Auto-links pending team_member records on sign-in.
 - **TeamContext** (`src/context/TeamContext.tsx`): Team members list with real-time sync from Supabase. Includes `inviteTeamMember()` for admin invitations.
-- **TaskContext** (`src/context/TaskContext.tsx`): Task CRUD, drag-drop reordering, auto-detection of past-due status. Persists to Supabase with real-time sync. Uses optimistic updates with rollback on failure.
+- **TaskContext** (`src/context/TaskContext.tsx`): Task CRUD, drag-drop reordering, auto-detection of past-due status, automatic `completedAt` timestamp management on status transitions. Persists to Supabase with real-time sync. Uses optimistic updates with rollback on failure.
 - **FilterContext** (`src/context/FilterContext.tsx`): Filter state (assignee, categories, statuses, search). Persists to localStorage.
 - **UIContext** (`src/context/UIContext.tsx`): View mode (kanban/month/week/day), selected date, modal state (task modal, invite modal, error log modal), sidebar toggle. In-memory only.
 - **ToastContext** (`src/context/ToastContext.tsx`): Toast notification system for showing success/error messages. Used for task operation feedback.
@@ -86,6 +86,11 @@ Access contexts via hooks: `useAuth()`, `useTeam()`, `useTasks()`, `useFilters()
 Note: `'past-due'` is a computed status (not stored in DB). Tasks are stored as `'planning'`, `'in-progress'`, or `'completed'`.
 
 Past-due status is computed automatically via `getEffectiveStatus()` when a task has an overdue date and isn't completed.
+
+### Completed Task Behavior
+- Tasks store a `completed_at` timestamp (DB) / `completedAt` (app) that is auto-set when status transitions to `'completed'` and cleared when moved away from completed.
+- In calendar views (Month/Week/Day), completed tasks appear on their **completion date** (not due date), using `getCalendarDateKey()` from `src/utils/date.ts`.
+- Completed tasks have distinct visual styling: green outline/shadow (`--color-completed`), green background tint (`--color-completed-bg`), checkmark prefix, and strikethrough title. CSS variables auto-adapt to dark mode.
 
 ### Authentication Flows
 
