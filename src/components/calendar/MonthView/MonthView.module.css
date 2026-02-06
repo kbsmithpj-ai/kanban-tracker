@@ -7,7 +7,7 @@
 
 .weekDays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   background: var(--color-gray-100);
   border-bottom: var(--nb-border);
 }
@@ -25,7 +25,7 @@
 
 .daysGrid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .dayCell {
