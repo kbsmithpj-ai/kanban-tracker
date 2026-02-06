@@ -101,6 +101,87 @@
   --transition-normal: 200ms ease;
 }
 
+/* ========================================
+   Dark Mode Theme
+   ======================================== */
+[data-theme="dark"] {
+  /* Primary Brand Colors - Keep recognizable but adjust for dark backgrounds */
+  --brand-navy: #e8e8f0;
+  --brand-navy-light: #f0f0f8;
+  --brand-navy-dark: #d0d0e0;
+  --brand-cyan: #00b4f0;
+  --brand-cyan-light: #40c8ff;
+  --brand-cyan-dark: #0090c0;
+  --brand-green: #50c850;
+  --brand-green-light: #70d870;
+  --brand-green-dark: #40a840;
+  --brand-gold: #f5c020;
+  --brand-gold-light: #ffd040;
+  --brand-gold-dark: #d0a000;
+
+  /* Core Neo-Brutalism Values - Adjusted for dark mode */
+  --nb-border-color: var(--color-gray-600);
+  --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 rgba(0, 0, 0, 0.4);
+  --nb-shadow-hover: 4px 4px 0 rgba(0, 0, 0, 0.5);
+
+  /* Category Colors - Darker muted backgrounds for dark mode */
+  --color-seed-pro: #00b4f0;
+  --color-seed-pro-bg: #0a2a3a;
+  --color-seed-pro-border: #0090c0;
+
+  --color-agronomy: #50c850;
+  --color-agronomy-bg: #0a2a14;
+  --color-agronomy-border: #40a840;
+
+  --color-sales: #f5c020;
+  --color-sales-bg: #302008;
+  --color-sales-border: #d0a000;
+
+  --color-testing: #9070d0;
+  --color-testing-bg: #1a1030;
+  --color-testing-border: #7050b0;
+
+  --color-samples: #f08050;
+  --color-samples-bg: #301810;
+  --color-samples-border: #c06040;
+
+  /* Status Colors - Darker muted backgrounds for dark mode */
+  --color-planning: #f5c020;
+  --color-planning-bg: #302008;
+
+  --color-in-progress: #00b4f0;
+  --color-in-progress-bg: #0a2a3a;
+
+  --color-completed: #50c850;
+  --color-completed-bg: #0a2a14;
+
+  --color-past-due: #f06060;
+  --color-past-due-bg: #301010;
+
+  /* Priority Colors - Slightly brighter for visibility on dark */
+  --color-priority-low: #8090a8;
+  --color-priority-medium: #f5c020;
+  --color-priority-high: #f08050;
+  --color-priority-urgent: #f06060;
+
+  /* Neutral Colors - Inverted for dark mode */
+  --color-white: #1a1a2e;
+  --color-off-white: #14142a;
+  --color-gray-100: #1e1e38;
+  --color-gray-200: #282848;
+  --color-gray-300: #363660;
+  --color-gray-400: #505078;
+  --color-gray-500: #7070a0;
+  --color-gray-600: #9090b8;
+  --color-gray-700: #b0b0d0;
+  --color-gray-800: #d0d0e0;
+  --color-black: #e8e8f0;
+
+  /* Accent Colors - Brighter for dark mode visibility */
+  --color-accent: #00b4f0;
+  --color-accent-hover: #40c8ff;
+}
+
 /* Global Reset */
 *, *::before, *::after {
   box-sizing: border-box;

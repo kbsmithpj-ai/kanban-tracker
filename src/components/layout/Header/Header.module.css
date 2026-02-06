@@ -87,6 +87,32 @@
   gap: var(--space-md);
 }
 
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--nb-border-color);
+  transition: all var(--transition-fast);
+}
+
+.themeToggle:hover {
+  background: var(--color-gray-100);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--nb-border-color);
+}
+
+.themeToggle:focus-visible {
+  outline: 2px solid var(--color-black);
+  outline-offset: 2px;
+}
+
 .inviteButton {
   background: var(--brand-cyan);
   color: var(--color-white);
@@ -219,5 +245,11 @@
   .errorLogsButton {
     padding: var(--space-xs) var(--space-sm);
     font-size: 0.75rem;
+  }
+
+  .themeToggle {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
   }
 }

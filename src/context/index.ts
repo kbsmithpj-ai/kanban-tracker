@@ -4,6 +4,8 @@ export { UIProvider, useUI } from './UIContext';
 export { TeamProvider, useTeam } from './TeamContext';
 export { AuthProvider, useAuth } from './AuthContext';
 export { ToastProvider, useToast } from './ToastContext';
+export { ThemeProvider, useTheme } from './ThemeContext';
 export type { ViewMode } from './UIContext';
 export type { TeamContextValue, InviteResult } from './TeamContext';
 export type { Toast, ToastType } from './ToastContext';
+export type { Theme } from './ThemeContext';

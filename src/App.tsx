@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TaskProvider, FilterProvider, UIProvider, TeamProvider, AuthProvider, ToastProvider, useAuth, useUI } from './context';
+import { TaskProvider, FilterProvider, UIProvider, TeamProvider, AuthProvider, ToastProvider, ThemeProvider, useAuth, useUI } from './context';
 import { Header, Sidebar, MainContent } from './components/layout';
 import { TaskModal } from './components/task';
 import { InviteModal } from './components/team';
@@ -247,13 +247,15 @@ function AuthenticatedApp() {
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <ToastProvider>
-          <UIProvider>
-            <AuthenticatedApp />
-          </UIProvider>
-        </ToastProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <UIProvider>
+              <AuthenticatedApp />
+            </UIProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

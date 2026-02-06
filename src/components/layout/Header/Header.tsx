@@ -1,4 +1,4 @@
-import { useUI, useAuth } from '../../../context';
+import { useUI, useAuth, useTheme } from '../../../context';
 import type { ViewMode } from '../../../context';
 import { UserMenu } from '../../auth';
 import styles from './Header.module.css';
@@ -13,6 +13,7 @@ const views: { id: ViewMode; label: string }[] = [
 export function Header() {
   const { viewMode, setViewMode, openTaskModal, openInviteModal, openErrorLogModal } = useUI();
   const { isAdmin } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className={styles.header}>
@@ -39,6 +40,13 @@ export function Header() {
       </nav>
 
       <div className={styles.actions}>
+        <button
+          className={styles.themeToggle}
+          onClick={toggleTheme}
+          aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+        >
+          <span aria-hidden="true">{theme === 'light' ? '\u263E' : '\u2600'}</span>
+        </button>
         {isAdmin && (
           <button
             className={styles.errorLogsButton}
