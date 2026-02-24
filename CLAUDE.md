@@ -161,16 +161,14 @@ The app includes a persistent error logging system for debugging production issu
 - Expandable rows show full context JSON and stack traces
 
 ### Styling
-- **Neo-brutalism design system** defined in `src/styles/neo-brutalism.css`
-- **Confluence Genetics brand colors:**
-  - `--brand-navy: #1a2744` (primary background, borders, shadows)
-  - `--brand-cyan: #00a8e8` (accent color, links, in-progress status)
-  - `--brand-green: #4cb944` (completed status, agronomy category)
-  - `--brand-gold: #f5b800` (planning status, sales category)
-- CSS custom properties for colors, spacing, borders, shadows
-- CSS Modules for component-scoped styles
-- Key visual properties: 3px borders, 4px offset shadows, 8px border radius
-- Font: Space Grotesk
+- **Clean modern theme** defined in `src/styles/neo-brutalism.css` (historical name, no longer neo-brutalism)
+- Light/dark mode via `ThemeContext` and `[data-theme="dark"]` CSS selectors
+- **Confluence Genetics brand colors** as CSS custom properties (`--brand-navy`, `--brand-cyan`, `--brand-green`, `--brand-gold`)
+- CSS Modules for component-scoped styles. Font: Space Grotesk
+- Never hardcode hex colors; always use CSS custom properties
+- Dark mode surfaces use a layered hierarchy: `--color-off-white` (page) < `--color-white` (cards) < `--color-gray-200` (interactive elements like buttons/chips)
+- For elements inside same-color containers in dark mode, use `[data-theme="dark"]` overrides with `--color-gray-200` background
+- Filter chips (StatusFilter, CategoryFilter) must not set inline `backgroundColor` when unselected -- let CSS handle it so dark mode overrides work
 
 ### Key Dependencies
 - **@supabase/supabase-js**: Supabase client for auth, database, and real-time
