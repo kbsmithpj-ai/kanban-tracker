@@ -45,7 +45,7 @@
 .message.error {
   background: var(--color-past-due-bg);
   border-color: var(--color-past-due);
-  color: #b91c1c;
+  color: var(--color-past-due);
 }
 
 .messageIcon {

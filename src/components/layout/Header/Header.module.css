@@ -161,7 +161,7 @@
 }
 
 .errorLogsButton:hover {
-  background: #c0392b;
+  background: var(--color-past-due);
   transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }

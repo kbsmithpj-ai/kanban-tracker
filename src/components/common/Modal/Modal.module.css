@@ -53,6 +53,10 @@
   background: var(--color-gray-100);
 }
 
+[data-theme="dark"] .header {
+  background: var(--color-gray-200);
+}
+
 .title {
   font-family: var(--font-primary);
   font-weight: 700;
@@ -89,4 +93,8 @@
   padding: var(--space-md) var(--space-lg);
   border-top: var(--nb-border);
   background: var(--color-gray-100);
+}
+
+[data-theme="dark"] .footer {
+  background: var(--color-gray-200);
 }

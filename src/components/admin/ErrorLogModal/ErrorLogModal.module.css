@@ -87,7 +87,7 @@
 /* Error Message */
 .errorMessage {
   padding: var(--space-md);
-  background: rgba(220, 53, 69, 0.1);
+  background: var(--color-past-due-bg);
   border: 2px solid var(--color-status-urgent);
   border-radius: var(--nb-radius);
   color: var(--color-status-urgent);
@@ -166,20 +166,20 @@
 
 .severityInfo {
   color: var(--brand-navy);
-  background: rgba(0, 168, 232, 0.15);
+  background: var(--color-in-progress-bg);
   border-color: var(--brand-cyan);
 }
 
 .severityWarning {
-  color: #7a5800;
-  background: rgba(245, 184, 0, 0.2);
+  color: var(--brand-gold);
+  background: var(--color-planning-bg);
   border-color: var(--brand-gold);
 }
 
 .severityError {
   color: var(--color-white);
-  background: #dc3545;
-  border-color: #dc3545;
+  background: var(--color-past-due);
+  border-color: var(--color-past-due);
 }
 
 .severityCritical {

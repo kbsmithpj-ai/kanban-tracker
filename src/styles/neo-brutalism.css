@@ -121,43 +121,43 @@
   --brand-gold-dark: #d0a000;
 
   /* Core Neo-Brutalism Values - Adjusted for dark mode */
-  --nb-border-color: var(--color-gray-600);
-  --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 rgba(0, 0, 0, 0.4);
-  --nb-shadow-hover: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  --nb-border-color: var(--color-gray-400);
+  --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 rgba(0, 0, 0, 0.6);
+  --nb-shadow-hover: 4px 4px 0 rgba(0, 0, 0, 0.7);
 
   /* Category Colors - Darker muted backgrounds for dark mode */
   --color-seed-pro: #00b4f0;
-  --color-seed-pro-bg: #0a2a3a;
+  --color-seed-pro-bg: #0f3548;
   --color-seed-pro-border: #0090c0;
 
   --color-agronomy: #50c850;
-  --color-agronomy-bg: #0a2a14;
+  --color-agronomy-bg: #0f351c;
   --color-agronomy-border: #40a840;
 
   --color-sales: #f5c020;
-  --color-sales-bg: #302008;
+  --color-sales-bg: #3a280c;
   --color-sales-border: #d0a000;
 
-  --color-testing: #9070d0;
-  --color-testing-bg: #1a1030;
+  --color-testing: #a080e0;
+  --color-testing-bg: #24183e;
   --color-testing-border: #7050b0;
 
-  --color-samples: #f08050;
-  --color-samples-bg: #301810;
+  --color-samples: #e88840;
+  --color-samples-bg: #3a2015;
   --color-samples-border: #c06040;
 
   /* Status Colors - Darker muted backgrounds for dark mode */
   --color-planning: #f5c020;
-  --color-planning-bg: #302008;
+  --color-planning-bg: #3a280c;
 
   --color-in-progress: #00b4f0;
-  --color-in-progress-bg: #0a2a3a;
+  --color-in-progress-bg: #0f3548;
 
   --color-completed: #50c850;
-  --color-completed-bg: #0a2a14;
+  --color-completed-bg: #0f351c;
 
-  --color-past-due: #f06060;
-  --color-past-due-bg: #301010;
+  --color-past-due: #f07070;
+  --color-past-due-bg: #3d1515;
 
   /* Priority Colors - Slightly brighter for visibility on dark */
   --color-priority-low: #8090a8;
@@ -172,11 +172,11 @@
   --color-gray-100: #1e1e38;
   --color-gray-200: #282848;
   --color-gray-300: #363660;
-  --color-gray-400: #505078;
-  --color-gray-500: #7070a0;
-  --color-gray-600: #9090b8;
-  --color-gray-700: #b0b0d0;
-  --color-gray-800: #d0d0e0;
+  --color-gray-400: #8888b0;
+  --color-gray-500: #9898c0;
+  --color-gray-600: #b0b0d0;
+  --color-gray-700: #c8c8e0;
+  --color-gray-800: #e0e0f0;
   --color-black: #e8e8f0;
 
   /* Accent Colors - Brighter for dark mode visibility */
