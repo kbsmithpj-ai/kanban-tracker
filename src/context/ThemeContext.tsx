@@ -59,12 +59,13 @@ function applyThemeToDocument(theme: Theme): void {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [theme, setThemeState] = useState<Theme>(() => {
+    const initial = getInitialTheme();
+    applyThemeToDocument(initial);
+    return initial;
+  });
 
-  /**
-   * Apply theme to document on initial load and whenever theme changes.
-   * This effect ensures the DOM attribute stays in sync with React state.
-   */
+  // Keep DOM attribute in sync on subsequent theme changes
   useEffect(() => {
     applyThemeToDocument(theme);
   }, [theme]);

@@ -133,3 +133,110 @@
   outline: 2px solid var(--color-white);
   outline-offset: 2px;
 }
+
+/* -- Tablet breakpoint ---------------------------------------------------- */
+@media (max-width: 768px) {
+  .dayView {
+    padding: var(--space-md);
+  }
+
+  .taskCard {
+    padding: var(--space-sm);
+    border-left-width: 5px;
+  }
+
+  .taskTitle {
+    font-size: 0.875rem;
+  }
+
+  .taskDescription {
+    font-size: 0.75rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .taskMeta {
+    gap: var(--space-sm);
+  }
+
+  .metaItem {
+    font-size: 0.625rem;
+  }
+
+  .emptyState {
+    padding: var(--space-xl);
+  }
+
+  .emptyText {
+    font-size: 0.875rem;
+  }
+
+  .addButton {
+    padding: var(--space-xs) var(--space-md);
+    font-size: 0.75rem;
+  }
+}
+
+/* -- Phone breakpoint ----------------------------------------------------- */
+@media (max-width: 480px) {
+  .dayView {
+    padding: var(--space-sm);
+    border-radius: 0;
+  }
+
+  .taskList {
+    gap: var(--space-sm);
+  }
+
+  .taskCard {
+    padding: var(--space-sm);
+    border-left-width: 4px;
+  }
+
+  .taskHeader {
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+  }
+
+  .taskTitle {
+    font-size: 0.8125rem;
+  }
+
+  .taskDescription {
+    font-size: 0.6875rem;
+    margin-bottom: var(--space-sm);
+    line-height: 1.4;
+  }
+
+  .taskMeta {
+    gap: var(--space-xs);
+  }
+
+  .metaItem {
+    font-size: 0.625rem;
+  }
+
+  .priority {
+    width: 8px;
+    height: 8px;
+  }
+
+  .emptyState {
+    padding: var(--space-lg);
+  }
+
+  .emptyIcon {
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .emptyText {
+    font-size: 0.8125rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .addButton {
+    padding: var(--space-xs) var(--space-md);
+    font-size: 0.75rem;
+  }
+}

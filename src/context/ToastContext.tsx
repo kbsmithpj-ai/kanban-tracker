@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useCallback, useState, useMemo } from 'react';
+import { createContext, useContext, useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { nanoid } from 'nanoid';
 
@@ -10,6 +10,7 @@ export interface Toast {
   message: string;
   type: ToastType;
   duration?: number;
+  exiting?: boolean;
 }
 
 interface ToastContextValue {
@@ -25,12 +26,32 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 const DEFAULT_DURATION = 5000;
 const ERROR_DURATION = 8000;
+const EXIT_ANIMATION_MS = 200;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const timerMapRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const dismissToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    // Guard against double-dismiss (e.g., user click + auto-dismiss race)
+    setToasts(prev => {
+      const target = prev.find(t => t.id === id);
+      if (!target || target.exiting) return prev;
+      return prev.map(t => t.id === id ? { ...t, exiting: true } : t);
+    });
+
+    // Clear any existing timer (auto-dismiss) before scheduling removal
+    const existingTimer = timerMapRef.current.get(id);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    // Schedule actual removal after the CSS exit animation completes
+    const exitTimer = setTimeout(() => {
+      timerMapRef.current.delete(id);
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, EXIT_ANIMATION_MS);
+    timerMapRef.current.set(id, exitTimer);
   }, []);
 
   const showToast = useCallback((
@@ -45,9 +66,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
     // Auto-dismiss after duration (unless duration is 0 for persistent toasts)
     if (duration > 0) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        timerMapRef.current.delete(id);
         dismissToast(id);
       }, duration);
+      timerMapRef.current.set(id, timer);
     }
 
     return id;
@@ -62,7 +85,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [showToast]);
 
   const clearAllToasts = useCallback(() => {
+    timerMapRef.current.forEach(timer => clearTimeout(timer));
+    timerMapRef.current.clear();
     setToasts([]);
+  }, []);
+
+  // Clean up all pending timers on unmount
+  useEffect(() => {
+    const timers = timerMapRef.current;
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+      timers.clear();
+    };
   }, []);
 
   const value = useMemo(() => ({

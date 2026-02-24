@@ -44,10 +44,9 @@ export function useFilteredTasks() {
     });
   }, [tasks, filters, getEffectiveStatus]);
 
-  // Pre-compute tasks by status for stable array references
-  // This prevents unnecessary re-renders in child components that consume these arrays
+  // Pre-compute tasks by status in a single pass for stable array references.
+  // This prevents unnecessary re-renders in child components that consume these arrays.
   const tasksByStatus = useMemo<TasksByStatus>(() => {
-    // Sort by due date (earliest first), tasks without due date go to bottom
     const sortByDueDate = (a: Task, b: Task) => {
       if (!a.dueDate && !b.dueDate) return 0;
       if (!a.dueDate) return 1;  // a goes after b
@@ -55,17 +54,23 @@ export function useFilteredTasks() {
       return a.dueDate.localeCompare(b.dueDate);
     };
 
-    const filterAndSort = (status: TaskStatus): Task[] =>
-      filteredTasks
-        .filter(task => getEffectiveStatus(task) === status)
-        .sort(sortByDueDate);
-
-    return {
-      'planning': filterAndSort('planning'),
-      'in-progress': filterAndSort('in-progress'),
-      'completed': filterAndSort('completed'),
-      'past-due': filterAndSort('past-due'),
+    const result: TasksByStatus = {
+      'planning': [],
+      'in-progress': [],
+      'completed': [],
+      'past-due': [],
     };
+
+    for (const task of filteredTasks) {
+      const status = getEffectiveStatus(task);
+      result[status].push(task);
+    }
+
+    for (const key of Object.keys(result) as TaskStatus[]) {
+      result[key].sort(sortByDueDate);
+    }
+
+    return result;
   }, [filteredTasks, getEffectiveStatus]);
 
   // Legacy function wrapper for backward compatibility

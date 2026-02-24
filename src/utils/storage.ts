@@ -57,6 +57,15 @@ export const storage = {
         }
       }
 
+      // If defaultValue is an array, parsed must also be an array
+      if (Array.isArray(defaultValue)) {
+        if (!Array.isArray(parsed)) {
+          console.warn(`Corrupted localStorage value for "${key}": expected array. Clearing.`);
+          storage.remove(key);
+          return defaultValue;
+        }
+      }
+
       return parsed as T;
     } catch (error) {
       // JSON parse failed - data is corrupted

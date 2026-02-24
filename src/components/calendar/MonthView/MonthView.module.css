@@ -96,7 +96,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-left: 3px solid;
+  border-left: 3px solid var(--task-border);
+  background-color: var(--task-bg);
   cursor: pointer;
   transition: transform var(--transition-fast);
 }
@@ -112,7 +113,7 @@
 
 .completedTask {
   outline: 1px solid var(--color-completed);
-  background-color: var(--color-completed-bg) !important;
+  background-color: var(--color-completed-bg);
 }
 
 .completedTitle {
@@ -130,4 +131,98 @@
   font-size: 0.625rem;
   color: var(--color-gray-500);
   padding: 2px 4px;
+}
+
+/* -- Tablet breakpoint ---------------------------------------------------- */
+@media (max-width: 768px) {
+  .weekDay {
+    padding: var(--space-xs);
+    font-size: 0.625rem;
+  }
+
+  .dayCell {
+    min-height: 72px;
+    padding: 2px;
+  }
+
+  .dayNumber {
+    font-size: 0.75rem;
+    width: 24px;
+    height: 24px;
+  }
+
+  .dayHeader {
+    margin-bottom: 2px;
+  }
+
+  .taskItem {
+    font-size: 0.5625rem;
+    padding: 1px 3px;
+  }
+
+  .moreCount {
+    font-size: 0.5625rem;
+    padding: 1px 3px;
+  }
+}
+
+/* -- Phone breakpoint ----------------------------------------------------- */
+@media (max-width: 480px) {
+  .weekDay {
+    padding: 2px;
+    font-size: 0.5625rem;
+    letter-spacing: 0;
+  }
+
+  .dayCell {
+    min-height: 48px;
+    padding: 2px;
+  }
+
+  .dayNumber {
+    font-size: 0.625rem;
+    width: 20px;
+    height: 20px;
+  }
+
+  .dayHeader {
+    margin-bottom: 1px;
+  }
+
+  .taskList {
+    gap: 1px;
+  }
+
+  /* Hide task text; show a small colored dot instead */
+  .taskItem {
+    font-size: 0;
+    padding: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border-left: none;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .taskItem:hover {
+    transform: none;
+  }
+
+  /* Wrap dots in a row so they sit side-by-side */
+  .taskList {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .completedTitle,
+  .checkmark {
+    display: none;
+  }
+
+  .moreCount {
+    font-size: 0.5rem;
+    padding: 0 2px;
+  }
 }

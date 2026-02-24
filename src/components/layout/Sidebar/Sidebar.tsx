@@ -1,13 +1,28 @@
+import { useEffect, useRef } from 'react';
 import { useUI } from '../../../context';
 import { FilterBar } from '../../filters';
 import styles from './Sidebar.module.css';
 
 export function Sidebar() {
   const { sidebarOpen, toggleSidebar } = useUI();
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  // Sync the inert attribute so keyboard focus cannot reach collapsed content.
+  // React 19 supports the inert prop, but we use a ref for broad compatibility.
+  useEffect(() => {
+    if (sidebarRef.current) {
+      if (!sidebarOpen) {
+        sidebarRef.current.setAttribute('inert', '');
+      } else {
+        sidebarRef.current.removeAttribute('inert');
+      }
+    }
+  }, [sidebarOpen]);
 
   return (
     <>
       <aside
+        ref={sidebarRef}
         className={`${styles.sidebar} ${!sidebarOpen ? styles.collapsed : ''}`}
         aria-label="Filters sidebar"
         aria-hidden={!sidebarOpen}

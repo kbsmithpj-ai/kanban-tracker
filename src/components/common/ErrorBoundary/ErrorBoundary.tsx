@@ -3,24 +3,39 @@ import type { ReactNode, ErrorInfo } from 'react';
 import { logCritical } from '../../../utils/errorLogger';
 import styles from './ErrorBoundary.module.css';
 
+const MAX_RETRIES = 3;
+
 interface ErrorBoundaryProps {
   children: ReactNode;
-  /** Optional fallback UI to render instead of the default error message */
-  fallback?: ReactNode;
+  /** Optional fallback UI, or a render function receiving the error and a reset callback */
+  fallback?: ReactNode | ((error: Error | null, reset: () => void) => ReactNode);
 }
 
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  retryCount: number;
 }
 
 /**
  * ErrorBoundary catches JavaScript errors anywhere in its child component tree,
  * logs the error, and displays a fallback UI instead of crashing the app.
  *
+ * Retries are capped at MAX_RETRIES to prevent infinite crash loops when the
+ * underlying error persists across re-renders.
+ *
  * Usage:
  * ```tsx
  * <ErrorBoundary>
+ *   <YourComponent />
+ * </ErrorBoundary>
+ *
+ * <ErrorBoundary fallback={(error, reset) => (
+ *   <div>
+ *     <p>Error: {error?.message}</p>
+ *     <button onClick={reset}>Retry</button>
+ *   </div>
+ * )}>
  *   <YourComponent />
  * </ErrorBoundary>
  * ```
@@ -31,11 +46,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.state = {
       hasError: false,
       error: null,
+      retryCount: 0,
     };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // Update state so the next render shows the fallback UI
+  static getDerivedStateFromError(error: Error): Pick<ErrorBoundaryState, 'hasError' | 'error'> {
     return {
       hasError: true,
       error,
@@ -43,7 +58,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log the error to our error logging service
     logCritical('React Error Boundary caught an error', {
       error,
       context: {
@@ -53,21 +67,26 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   handleReset = (): void => {
-    this.setState({
+    if (this.state.retryCount >= MAX_RETRIES) return;
+    this.setState(prev => ({
       hasError: false,
       error: null,
-    });
+      retryCount: prev.retryCount + 1,
+    }));
   };
 
   render(): ReactNode {
-    const { hasError, error } = this.state;
+    const { hasError, error, retryCount } = this.state;
     const { children, fallback } = this.props;
 
     if (hasError) {
-      // If a custom fallback is provided, render it
       if (fallback) {
-        return fallback;
+        return typeof fallback === 'function'
+          ? fallback(error, this.handleReset)
+          : fallback;
       }
+
+      const retriesExhausted = retryCount >= MAX_RETRIES;
 
       // Default fallback UI
       return (
@@ -94,7 +113,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             </div>
             <h2 className={styles.title}>Something went wrong</h2>
             <p className={styles.message}>
-              An unexpected error occurred. Please try again.
+              {retriesExhausted
+                ? 'This error could not be recovered automatically. Please refresh the page.'
+                : 'An unexpected error occurred. Please try again.'}
             </p>
             {import.meta.env.DEV && error && (
               <details className={styles.details}>
@@ -105,13 +126,23 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 </pre>
               </details>
             )}
-            <button
-              type="button"
-              className={styles.button}
-              onClick={this.handleReset}
-            >
-              Try Again
-            </button>
+            {retriesExhausted ? (
+              <button
+                type="button"
+                className={styles.button}
+                onClick={() => window.location.reload()}
+              >
+                Refresh Page
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.button}
+                onClick={this.handleReset}
+              >
+                Try Again
+              </button>
+            )}
           </div>
         </div>
       );

@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useCallback, useMemo, useEffect, useState } from 'react';
+import { createContext, useContext, useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { nanoid } from 'nanoid';
 import type { Task, TaskStatus } from '../types/task';
@@ -74,6 +74,23 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Midnight tick: forces a re-render at midnight so getEffectiveStatus
+  // re-evaluates past-due status for tasks whose due date just elapsed.
+  const [midnightTick, setMidnightTick] = useState(0);
+
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+    const timer = setTimeout(() => setMidnightTick(t => t + 1), msUntilMidnight);
+    return () => clearTimeout(timer);
+  }, [midnightTick]);
+
+  // Fix 1: Track in-flight mutations so real-time subscription does not
+  // clobber optimistic state with a stale server snapshot.
+  const pendingMutationCount = useRef(0);
+  const debouncedRefetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const getEffectiveStatus = useCallback((task: Task): TaskStatus => {
     // Auto-detect past-due: if task has a due date in the past and isn't completed
     if (task.status !== 'completed' && isPastDue(task.dueDate)) {
@@ -104,6 +121,21 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  /**
+   * Schedule a refetch that is debounced by 500ms. Called by the real-time
+   * handler when mutations are in flight so we get a clean snapshot once
+   * all pending writes settle.
+   */
+  const scheduleDebouncedRefetch = useCallback(() => {
+    if (debouncedRefetchTimer.current) {
+      clearTimeout(debouncedRefetchTimer.current);
+    }
+    debouncedRefetchTimer.current = setTimeout(() => {
+      debouncedRefetchTimer.current = null;
+      fetchTasks();
+    }, 500);
+  }, [fetchTasks]);
+
   // Fetch tasks on mount and subscribe to real-time changes
   useEffect(() => {
     fetchTasks();
@@ -114,40 +146,74 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks' },
         () => {
-          // Refetch on any change to keep state in sync
+          // Fix 1: Skip immediate refetch while mutations are in flight to
+          // avoid overwriting optimistic state. Schedule a debounced refetch
+          // instead so we converge after the last mutation settles.
+          if (pendingMutationCount.current > 0) {
+            scheduleDebouncedRefetch();
+            return;
+          }
           fetchTasks();
         }
       )
-      .subscribe();
+      // Fix 5: Detect system-level subscription errors
+      .on('system', {}, (payload) => {
+        console.error('Realtime system event on tasks_changes channel:', payload);
+      })
+      .subscribe((status, err) => {
+        // Fix 5: Detect CHANNEL_ERROR from the subscription callback
+        if (status === 'CHANNEL_ERROR') {
+          console.error('Realtime CHANNEL_ERROR on tasks_changes:', err);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchTasks]);
+  }, [fetchTasks, scheduleDebouncedRefetch]);
+
+  // Cleanup debounced timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debouncedRefetchTimer.current) {
+        clearTimeout(debouncedRefetchTimer.current);
+      }
+    };
+  }, []);
 
   const addTask = useCallback(
     async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'order' | 'completedAt'>): Promise<Task> => {
       const tempId = nanoid();
       const now = new Date().toISOString();
 
-      // Calculate order optimistically from current state
-      const tasksInStatus = tasks.filter(t => getEffectiveStatus(t) === taskData.status);
-      const maxOrder = tasksInStatus.length > 0
-        ? Math.max(...tasksInStatus.map(t => t.order))
-        : -1;
+      // Fix 4: Use functional updater so order computation uses the latest
+      // state, avoiding stale closures during rapid sequential adds.
+      let optimisticTask: Task | null = null;
 
-      const optimisticTask: Task = {
-        ...taskData,
-        id: tempId,
-        completedAt: taskData.status === 'completed' ? now : null,
-        createdAt: now,
-        updatedAt: now,
-        order: maxOrder + 1,
-      };
+      setTasks(prev => {
+        const tasksInStatus = prev.filter(t => {
+          if (t.status !== 'completed' && isPastDue(t.dueDate)) {
+            return 'past-due' === taskData.status;
+          }
+          return t.status === taskData.status;
+        });
+        const maxOrder = tasksInStatus.length > 0
+          ? Math.max(...tasksInStatus.map(t => t.order))
+          : -1;
 
-      // Optimistic update
-      setTasks(prev => [...prev, optimisticTask]);
+        optimisticTask = {
+          ...taskData,
+          id: tempId,
+          completedAt: taskData.status === 'completed' ? now : null,
+          createdAt: now,
+          updatedAt: now,
+          order: maxOrder + 1,
+        };
 
+        return [...prev, optimisticTask];
+      });
+
+      pendingMutationCount.current += 1;
       try {
         const { data, error: insertError } = await supabase
           .from('tasks')
@@ -176,9 +242,11 @@ export function TaskProvider({ children }: { children: ReactNode }) {
           },
         });
         throw new Error(message);
+      } finally {
+        pendingMutationCount.current -= 1;
       }
     },
-    [tasks, getEffectiveStatus]
+    []
   );
 
   const updateTask = useCallback(
@@ -207,6 +275,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         )
       );
 
+      pendingMutationCount.current += 1;
       try {
         // Build the database update object, transforming camelCase to snake_case
         const dbUpdates: DbTaskUpdate = {};
@@ -246,6 +315,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
           },
         });
         throw new Error(message);
+      } finally {
+        pendingMutationCount.current -= 1;
       }
     },
     [tasks]
@@ -253,13 +324,15 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
   const deleteTask = useCallback(
     async (id: string) => {
-      const originalTasks = tasks;
+      // Fix 3: Capture only the deleted task, not the full snapshot, so
+      // rollback does not clobber concurrent mutations to other tasks.
       const taskToDelete = tasks.find(t => t.id === id);
       if (!taskToDelete) return;
 
       // Optimistic update
       setTasks(prev => prev.filter(task => task.id !== id));
 
+      pendingMutationCount.current += 1;
       try {
         const { error: deleteError } = await supabase
           .from('tasks')
@@ -268,8 +341,13 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
         if (deleteError) throw deleteError;
       } catch (err) {
-        // Rollback optimistic update
-        setTasks(originalTasks);
+        // Fix 3: Targeted rollback -- re-insert only the deleted task if it
+        // is not already present (guards against double-rollback).
+        setTasks(prev =>
+          prev.some(t => t.id === id)
+            ? prev
+            : [...prev, taskToDelete].sort((a, b) => a.order - b.order)
+        );
         const message = err instanceof Error ? err.message : 'Failed to delete task';
         console.error('Failed to delete task:', err);
         logError('Failed to delete task', {
@@ -280,6 +358,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
           },
         });
         throw new Error(message);
+      } finally {
+        pendingMutationCount.current -= 1;
       }
     },
     [tasks]
@@ -287,14 +367,17 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
   const moveTask = useCallback(
     async (id: string, newStatus: TaskStatus, newOrder: number) => {
-      const originalTasks = tasks;
       const taskToMove = tasks.find(t => t.id === id);
       if (!taskToMove) return;
 
-      // Calculate the new state optimistically
+      // Fix 6: Filter other tasks by excluding only the moved task, not by
+      // effective status. This prevents past-due tasks from disappearing when
+      // the target status is also past-due.
+      const otherTasks = tasks.filter(t => t.id !== id);
+
       // Get tasks in the target status (excluding the task being moved)
-      const tasksInNewStatus = tasks
-        .filter(t => t.id !== id && getEffectiveStatus(t) === newStatus)
+      const tasksInNewStatus = otherTasks
+        .filter(t => getEffectiveStatus(t) === newStatus)
         .sort((a, b) => a.order - b.order);
 
       // Normalize past-due to a storable status
@@ -316,20 +399,27 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         ...tasksInNewStatus.slice(newOrder),
       ].map((t, idx) => ({ ...t, order: idx }));
 
-      // Merge back with tasks from other statuses
-      const otherTasks = tasks.filter(
-        t => t.id !== id && getEffectiveStatus(t) !== newStatus
+      // Fix 6: Merge with tasks NOT in the target column (also excluding the
+      // moved task, which is already in updatedTasksInStatus).
+      const tasksOutsideTarget = otherTasks.filter(
+        t => getEffectiveStatus(t) !== newStatus
       );
 
-      const updatedTasks = [...otherTasks, ...updatedTasksInStatus];
+      const updatedTasks = [...tasksOutsideTarget, ...updatedTasksInStatus];
+
+      // Capture the original state of tasks that will be modified, for
+      // targeted rollback (Fix 3).
+      const affectedIds = new Set(updatedTasksInStatus.map(t => t.id));
+      const originalAffected = tasks.filter(t => affectedIds.has(t.id));
 
       // Optimistic update
       setTasks(updatedTasks);
 
+      pendingMutationCount.current += 1;
       try {
         // Find all tasks that need updating (changed order or status)
         const tasksToUpdate = updatedTasksInStatus.filter(updatedTask => {
-          const original = originalTasks.find(o => o.id === updatedTask.id);
+          const original = tasks.find(o => o.id === updatedTask.id);
           return (
             !original ||
             original.order !== updatedTask.order ||
@@ -337,8 +427,9 @@ export function TaskProvider({ children }: { children: ReactNode }) {
           );
         });
 
-        // Batch update all affected tasks
-        await Promise.all(
+        // Fix 2: Batch update all affected tasks, then check for Supabase
+        // errors (Promise.all resolves even when .update returns an error).
+        const results = await Promise.all(
           tasksToUpdate.map(task => {
             const updateData: DbTaskUpdate = {
               status: task.status as DbTaskStatus,
@@ -354,9 +445,20 @@ export function TaskProvider({ children }: { children: ReactNode }) {
               .eq('id', task.id);
           })
         );
+
+        const firstError = results.find(r => r.error)?.error;
+        if (firstError) throw firstError;
       } catch (err) {
-        // Rollback optimistic update
-        setTasks(originalTasks);
+        // Fix 3: Targeted rollback -- restore only the tasks that were
+        // changed by this mutation, preserving concurrent modifications to
+        // other tasks.
+        setTasks(prev => {
+          const originalById = new Map(originalAffected.map(t => [t.id, t]));
+          return prev.map(t => {
+            const orig = originalById.get(t.id);
+            return orig ? orig : t;
+          });
+        });
         const message = err instanceof Error ? err.message : 'Failed to move task';
         console.error('Failed to move task:', err);
         logError('Failed to move task', {
@@ -369,6 +471,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
           },
         });
         throw new Error(message);
+      } finally {
+        pendingMutationCount.current -= 1;
       }
     },
     [tasks, getEffectiveStatus]
@@ -376,7 +480,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
   const reorderTasks = useCallback(
     async (taskId: string, newOrder: number) => {
-      const originalTasks = tasks;
       const task = tasks.find(t => t.id === taskId);
       if (!task) return;
 
@@ -400,6 +503,10 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         updatedAt: t.id === taskId ? new Date().toISOString() : t.updatedAt,
       }));
 
+      // Fix 3: Capture original state of affected tasks for targeted rollback.
+      const affectedIds = new Set(updatedTasksInStatus.map(t => t.id));
+      const originalAffected = tasks.filter(t => affectedIds.has(t.id));
+
       // Merge back with tasks from other statuses
       const otherTasks = tasks.filter(t => getEffectiveStatus(t) !== status);
       const updatedTasks = [...otherTasks, ...updatedTasksInStatus];
@@ -407,15 +514,16 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       // Optimistic update
       setTasks(updatedTasks);
 
+      pendingMutationCount.current += 1;
       try {
         // Find all tasks whose order changed
         const tasksToUpdate = updatedTasksInStatus.filter(updatedTask => {
-          const original = originalTasks.find(o => o.id === updatedTask.id);
+          const original = tasks.find(o => o.id === updatedTask.id);
           return !original || original.order !== updatedTask.order;
         });
 
-        // Batch update all affected tasks
-        await Promise.all(
+        // Fix 2: Check for Supabase errors after Promise.all
+        const results = await Promise.all(
           tasksToUpdate.map(t => {
             const updateData: DbTaskUpdate = { order: t.order };
             return supabase
@@ -424,9 +532,18 @@ export function TaskProvider({ children }: { children: ReactNode }) {
               .eq('id', t.id);
           })
         );
+
+        const firstError = results.find(r => r.error)?.error;
+        if (firstError) throw firstError;
       } catch (err) {
-        // Rollback optimistic update
-        setTasks(originalTasks);
+        // Fix 3: Targeted rollback using functional updater
+        setTasks(prev => {
+          const originalById = new Map(originalAffected.map(t => [t.id, t]));
+          return prev.map(t => {
+            const orig = originalById.get(t.id);
+            return orig ? orig : t;
+          });
+        });
         const message = err instanceof Error ? err.message : 'Failed to reorder tasks';
         console.error('Failed to reorder tasks:', err);
         logError('Failed to reorder tasks', {
@@ -438,6 +555,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
           },
         });
         throw new Error(message);
+      } finally {
+        pendingMutationCount.current -= 1;
       }
     },
     [tasks, getEffectiveStatus]
@@ -465,6 +584,10 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       getTasksByStatus,
       getEffectiveStatus,
     }),
+    // midnightTick is included so the context value reference changes at
+    // midnight, causing all consumers to re-render and re-evaluate
+    // getEffectiveStatus with the new date.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       tasks,
       isLoading,
@@ -476,6 +599,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       reorderTasks,
       getTasksByStatus,
       getEffectiveStatus,
+      midnightTick,
     ]
   );
 

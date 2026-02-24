@@ -12,6 +12,7 @@ export function TaskModal() {
   const { showError } = useToast();
   const formRef = useRef<TaskFormRef>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const task = useMemo(() => {
     if (!taskModal.taskId) return null;
@@ -46,14 +47,21 @@ export function TaskModal() {
     }
   }, [task, addTask, updateTask, closeTaskModal, showError]);
 
-  const handleDelete = useCallback(async () => {
-    if (!task || !window.confirm('Are you sure you want to delete this task?')) {
-      return;
-    }
+  const handleDeleteRequest = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const handleDeleteCancel = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!task) return;
 
     setIsSaving(true);
     try {
       await deleteTask(task.id);
+      setShowDeleteConfirm(false);
       closeTaskModal();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred';
@@ -63,6 +71,11 @@ export function TaskModal() {
     }
   }, [task, deleteTask, closeTaskModal, showError]);
 
+  const handleClose = useCallback(() => {
+    setShowDeleteConfirm(false);
+    closeTaskModal();
+  }, [closeTaskModal]);
+
   const handleSaveClick = useCallback(() => {
     formRef.current?.submit();
   }, []);
@@ -71,7 +84,7 @@ export function TaskModal() {
 
   const footer = (
     <div className={styles.footer}>
-      <Button type="button" variant="ghost" onClick={closeTaskModal} disabled={isSaving}>
+      <Button type="button" variant="ghost" onClick={handleClose} disabled={isSaving}>
         Cancel
       </Button>
       <Button type="button" variant="primary" onClick={handleSaveClick} disabled={isSaving}>
@@ -83,7 +96,7 @@ export function TaskModal() {
   return (
     <Modal
       isOpen={taskModal.isOpen}
-      onClose={closeTaskModal}
+      onClose={handleClose}
       title={title}
       footer={footer}
     >
@@ -91,8 +104,37 @@ export function TaskModal() {
         ref={formRef}
         initialData={task}
         onSubmit={handleSubmit}
-        onDelete={task ? handleDelete : undefined}
+        onDelete={task ? handleDeleteRequest : undefined}
       />
+      {showDeleteConfirm && (
+        <div className={styles.deleteConfirm} role="alert">
+          <p className={styles.deleteConfirmMessage}>
+            Are you sure you want to delete this task? This cannot be undone.
+          </p>
+          <div className={styles.deleteConfirmActions}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="small"
+              onClick={handleDeleteCancel}
+              disabled={isSaving}
+              aria-label="Cancel deletion"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              size="small"
+              onClick={handleDeleteConfirm}
+              disabled={isSaving}
+              aria-label="Confirm delete task"
+            >
+              {isSaving ? 'Deleting...' : 'Delete'}
+            </Button>
+          </div>
+        </div>
+      )}
     </Modal>
   );
 }

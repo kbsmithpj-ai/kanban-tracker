@@ -85,6 +85,7 @@
 .taskCard {
   background: var(--color-white);
   border: 1px solid var(--nb-border-color);
+  border-left: 4px solid var(--task-border);
   border-radius: var(--nb-radius);
   padding: var(--space-sm);
   cursor: pointer;
@@ -137,4 +138,107 @@
   font-size: 0.75rem;
   text-align: center;
   padding: var(--space-md);
+}
+
+/* -- Tablet breakpoint ---------------------------------------------------- */
+@media (max-width: 768px) {
+  .dayHeader {
+    padding: var(--space-sm);
+  }
+
+  .dayName {
+    font-size: 0.625rem;
+    margin-bottom: 2px;
+  }
+
+  .dayDate {
+    font-size: 1rem;
+  }
+
+  .dayHeader.today .dayDate {
+    width: 28px;
+    height: 28px;
+  }
+
+  .content {
+    min-height: 300px;
+  }
+
+  .dayColumn {
+    padding: var(--space-xs);
+    gap: var(--space-xs);
+  }
+
+  .taskCard {
+    padding: var(--space-xs);
+  }
+
+  .taskTitle {
+    font-size: 0.625rem;
+  }
+
+  .emptyDay {
+    font-size: 0.625rem;
+    padding: var(--space-sm);
+  }
+}
+
+/* -- Phone breakpoint ----------------------------------------------------- */
+@media (max-width: 480px) {
+  .weekView {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .header {
+    min-width: 600px;
+  }
+
+  .content {
+    min-width: 600px;
+    min-height: 260px;
+  }
+
+  .dayHeader {
+    padding: var(--space-xs);
+  }
+
+  .dayName {
+    font-size: 0.5625rem;
+    letter-spacing: 0;
+    margin-bottom: 1px;
+  }
+
+  .dayDate {
+    font-size: 0.875rem;
+  }
+
+  .dayHeader.today .dayDate {
+    width: 24px;
+    height: 24px;
+  }
+
+  .dayColumn {
+    padding: 2px;
+    gap: var(--space-xs);
+  }
+
+  .taskCard {
+    padding: 2px var(--space-xs);
+    border-left-width: 3px;
+  }
+
+  .taskTitle {
+    font-size: 0.5625rem;
+    margin-bottom: 2px;
+  }
+
+  .taskMeta {
+    gap: 2px;
+  }
+
+  .emptyDay {
+    font-size: 0.5625rem;
+    padding: var(--space-xs);
+  }
 }

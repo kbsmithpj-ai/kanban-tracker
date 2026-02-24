@@ -1,4 +1,4 @@
-import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays } from 'date-fns';
+import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, startOfWeek } from 'date-fns';
 import { useUI } from '../../../context';
 import styles from './CalendarHeader.module.css';
 
@@ -47,7 +47,7 @@ export function CalendarHeader() {
       case 'month':
         return format(selectedDate, 'MMMM yyyy');
       case 'week':
-        return format(selectedDate, "'Week of' MMM d, yyyy");
+        return format(startOfWeek(selectedDate), "'Week of' MMM d, yyyy");
       case 'day':
         return format(selectedDate, 'EEEE, MMMM d, yyyy');
       default:

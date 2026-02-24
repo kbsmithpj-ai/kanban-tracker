@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from 'react';
 import styles from './Input.module.css';
 
@@ -21,6 +21,9 @@ type InputProps = InputFieldProps | TextareaProps;
 
 export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
   ({ label, error, multiline, showCharacterCount, characterCountThreshold = 100, className = '', ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = props.id || generatedId;
+
     const inputClasses = [
       styles.input,
       multiline && styles.textarea,
@@ -36,16 +39,18 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
 
     return (
       <div className={styles.inputWrapper}>
-        {label && <label className={styles.label}>{label}</label>}
+        {label && <label className={styles.label} htmlFor={inputId}>{label}</label>}
         {multiline ? (
           <textarea
             ref={ref as React.Ref<HTMLTextAreaElement>}
+            id={inputId}
             className={inputClasses}
             {...(props as TextareaHTMLAttributes<HTMLTextAreaElement>)}
           />
         ) : (
           <input
             ref={ref as React.Ref<HTMLInputElement>}
+            id={inputId}
             className={inputClasses}
             {...(props as InputHTMLAttributes<HTMLInputElement>)}
           />

@@ -5,7 +5,7 @@ import type { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { DbTeamMember } from '../types/database';
 import { withTimeout, clearAuthState } from '../utils/recovery';
-import { logError } from '../utils/errorLogger';
+import { logError, setLoggerUserId } from '../utils/errorLogger';
 
 /** Timeout for session initialization (5 seconds) */
 const SESSION_TIMEOUT_MS = 5000;
@@ -88,6 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   /** Track initialization attempts to allow retry */
   const initAttemptRef = useRef(0);
@@ -146,37 +147,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const linkPendingTeamMember = useCallback(async (userId: string, email: string): Promise<DbTeamMember | null> => {
     try {
-      // Look for a pending team_member record with this email but no user_id
-      const { data: pendingMember, error: findError } = await supabase
+      const avatarColor = generateAvatarColor();
+
+      // Atomic update: the .is('user_id', null) filter ensures that if another
+      // concurrent request already claimed this record, this update is a no-op.
+      // Using .maybeSingle() so duplicate pending rows or zero matches don't throw.
+      const { data: linked, error: linkError } = await supabase
         .from('team_members')
-        .select('*')
+        .update({ user_id: userId, avatar_color: avatarColor })
         .eq('email', email)
         .is('user_id', null)
-        .single();
+        .select()
+        .maybeSingle();
 
-      if (findError || !pendingMember) {
-        // No pending record found - this is OK, user might need to sign up normally
+      if (linkError) {
+        console.error('Failed to link pending team member:', linkError);
         return null;
       }
 
-      // Cast to DbTeamMember for type safety
-      const pending = pendingMember as DbTeamMember;
-
-      // Found a pending record - link it to this user
-      const { data: updatedMember, error: updateError } = await supabase
-        .from('team_members')
-        .update({ user_id: userId })
-        .eq('id', pending.id)
-        .select('*')
-        .single();
-
-      if (updateError) {
-        console.error('Failed to link pending team member:', updateError);
+      if (!linked) {
+        // No pending record matched - user may need to sign up normally
         return null;
       }
 
       console.log('Successfully linked pending team member record to user:', userId);
-      return updatedMember as DbTeamMember;
+      return linked as DbTeamMember;
     } catch (error) {
       console.error('Error linking pending team member:', error);
       logError('Error linking pending team member', {
@@ -252,6 +247,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           setSession(currentSession);
           setUser(currentSession.user);
+          setLoggerUserId(currentSession.user.id);
 
           try {
             let member = await fetchTeamMember(currentSession.user.id);
@@ -328,15 +324,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       mounted = false;
     };
-  }, [fetchTeamMember, checkForRecoveryToken]);
+  }, [fetchTeamMember, linkPendingTeamMember, checkForRecoveryToken, retryCount]);
 
   /**
    * Subscribe to auth state changes.
    * Handles sign in/out, token refresh, and password recovery events.
+   *
+   * This handler does NOT control isLoading -- the initialization effect is
+   * the sole owner of loading-state transitions. This avoids a race where
+   * the listener fires before team member fetch completes, causing premature
+   * render of downstream components.
    */
   useEffect(() => {
+    let mounted = true;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        if (!mounted) return;
+
         // Clear any auth error on successful auth events
         if (currentSession) {
           setAuthError(null);
@@ -348,6 +353,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (currentSession?.user) {
           try {
             let member = await fetchTeamMember(currentSession.user.id);
+            if (!mounted) return;
 
             // If no linked team member found, try to link a pending invite record
             if (!member && currentSession.user.email) {
@@ -355,10 +361,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 currentSession.user.id,
                 currentSession.user.email
               );
+              if (!mounted) return;
             }
 
             setTeamMember(member);
           } catch (error) {
+            if (!mounted) return;
             // Team member fetch failed, but user is still authenticated
             console.warn('Failed to fetch team member on auth change:', error);
             logError('Failed to fetch team member on auth state change', {
@@ -371,6 +379,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setTeamMember(null);
         }
 
+        if (!mounted) return;
+
         // Handle specific auth events
         switch (event) {
           case 'SIGNED_OUT':
@@ -380,37 +390,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
             break;
 
           case 'PASSWORD_RECOVERY':
-            // Handle password recovery event from Supabase
             setIsRecoveryMode(true);
-            // Clear the URL hash after Supabase has processed the tokens
             clearUrlHash();
             break;
 
           case 'TOKEN_REFRESHED':
-            // Token was refreshed successfully - update session state
-            // This ensures the app has the latest valid tokens
             if (currentSession) {
               setSession(currentSession);
             }
             break;
 
-          case 'SIGNED_IN':
-          case 'INITIAL_SESSION':
-            // Clear loading state on successful auth
-            setIsLoading(false);
-            break;
-
           default:
-            // Handle any other events
             break;
         }
       }
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchTeamMember, clearUrlHash]);
+  }, [fetchTeamMember, linkPendingTeamMember, clearUrlHash]);
 
   /**
    * Sign in with email and password.
@@ -497,6 +497,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
     setSession(null);
     setTeamMember(null);
+    setLoggerUserId(null);
   }, []);
 
   /**
@@ -543,32 +544,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Retry authentication after an error.
-   * Triggers re-initialization by incrementing the attempt counter.
+   * Incrementing retryCount triggers the initialization useEffect to re-run.
    */
   const retryAuth = useCallback(() => {
     setIsLoading(true);
     setAuthError(null);
-    // Increment the attempt ref to trigger the useEffect
-    initAttemptRef.current++;
-    // Force a re-run of the init effect by updating state
     setUser(null);
     setSession(null);
     setTeamMember(null);
+    setRetryCount(c => c + 1);
   }, []);
-
-  // Re-run initialization when retryAuth is called
-  useEffect(() => {
-    // This effect re-triggers initialization when auth state is reset via retryAuth
-    // The initAttemptRef ensures we don't double-run
-    if (!isLoading && authError === null && user === null && session === null) {
-      // Check if we were explicitly reset (not initial load)
-      const currentAttempt = initAttemptRef.current;
-      if (currentAttempt > 1) {
-        setIsLoading(true);
-        // The main initialization effect will pick this up
-      }
-    }
-  }, [isLoading, authError, user, session]);
 
   const isAdmin = teamMember?.is_admin ?? false;
   const isAuthenticated = user !== null;

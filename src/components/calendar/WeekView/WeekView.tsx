@@ -127,9 +127,8 @@ export function WeekView() {
                       key={task.id}
                       className={cardClasses}
                       style={{
-                        borderLeftColor: category.primaryColor,
-                        borderLeftWidth: '4px',
-                      }}
+                        '--task-border': category.primaryColor,
+                      } as React.CSSProperties}
                       onClick={() => handleTaskClick(task.id)}
                       onKeyDown={(e) => handleTaskKeyDown(e, task.id)}
                       role="button"

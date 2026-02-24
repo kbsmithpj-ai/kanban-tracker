@@ -13,8 +13,9 @@ export function AssigneeFilter() {
 
   return (
     <div className={styles.container}>
-      <label className={styles.label}>Assignee</label>
+      <label className={styles.label} htmlFor="assignee-filter">Assignee</label>
       <select
+        id="assignee-filter"
         className={styles.select}
         value={filters.assigneeId || ''}
         onChange={handleChange}

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useId } from 'react';
 import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
@@ -17,6 +17,7 @@ const FOCUSABLE_SELECTOR =
 export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
+  const titleId = useId();
 
   const handleEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -46,15 +47,13 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
     }
   }, []);
 
+  // Scroll lock, focus capture on open, and focus restoration on close/unmount.
+  // Keyed only on isOpen so it does not re-run when onClose changes reference.
   useEffect(() => {
     if (isOpen) {
-      // Store the currently focused element before opening
       previouslyFocusedElement.current = document.activeElement as HTMLElement;
-
-      document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
 
-      // Move focus to the modal after render
       requestAnimationFrame(() => {
         if (modalRef.current) {
           const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
@@ -62,20 +61,28 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
           if (firstFocusable) {
             firstFocusable.focus();
           } else {
-            // If no focusable elements, focus the modal container itself
             modalRef.current.focus();
           }
         }
       });
     }
     return () => {
-      document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
 
-      // Restore focus to the previously focused element when modal closes
       if (previouslyFocusedElement.current && typeof previouslyFocusedElement.current.focus === 'function') {
         previouslyFocusedElement.current.focus();
       }
+    };
+  }, [isOpen]);
+
+  // Escape key listener. Separate effect so it stays in sync with the latest
+  // handleEscape callback without disturbing scroll lock or focus management.
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, handleEscape]);
 
@@ -87,7 +94,7 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
+      aria-labelledby={titleId}
     >
       <div
         ref={modalRef}
@@ -97,7 +104,7 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
         tabIndex={-1}
       >
         <div className={styles.header}>
-          <h2 id="modal-title" className={styles.title}>{title}</h2>
+          <h2 id={titleId} className={styles.title}>{title}</h2>
           <button
             className={styles.closeButton}
             onClick={onClose}

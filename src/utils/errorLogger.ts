@@ -7,17 +7,17 @@ interface LogErrorOptions {
   error?: Error | unknown;
 }
 
+// Module-level cached user ID, set by AuthContext via setLoggerUserId.
+// Avoids an async getSession() network round-trip on every log call.
+let currentUserId: string | null = null;
+
 /**
- * Gets the current user ID from the Supabase session.
- * Returns null if no user is authenticated.
+ * Sets the cached user ID used by the error logger.
+ * Call this from AuthContext when the session changes so that
+ * logError can synchronously attach the user ID without a network call.
  */
-async function getCurrentUserId(): Promise<string | null> {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.user?.id ?? null;
-  } catch {
-    return null;
-  }
+export function setLoggerUserId(userId: string | null): void {
+  currentUserId = userId;
 }
 
 /**
@@ -40,14 +40,13 @@ function getStackTrace(error: unknown): string | null {
  * @param options.context - Additional context data to store with the log
  * @param options.error - An Error object to extract stack trace from
  */
-export async function logError(
+export function logError(
   message: string,
   options: LogErrorOptions = {}
-): Promise<void> {
+): void {
   const { severity = 'error', context = {}, error } = options;
 
   try {
-    const userId = await getCurrentUserId();
     const stackTrace = getStackTrace(error);
 
     // If the error is an object with a message, include it in context
@@ -62,7 +61,7 @@ export async function logError(
     }
 
     const logEntry: DbErrorLogInsert = {
-      user_id: userId,
+      user_id: currentUserId,
       severity,
       message,
       context: errorContext,
@@ -98,16 +97,16 @@ export async function logError(
  * Logs an informational message.
  * Use for tracking non-error events that may be useful for debugging.
  */
-export function logInfo(message: string, context?: Record<string, unknown>): Promise<void> {
-  return logError(message, { severity: 'info', context });
+export function logInfo(message: string, context?: Record<string, unknown>): void {
+  logError(message, { severity: 'info', context });
 }
 
 /**
  * Logs a warning message.
  * Use for potentially problematic situations that don't cause immediate failures.
  */
-export function logWarning(message: string, context?: Record<string, unknown>): Promise<void> {
-  return logError(message, { severity: 'warning', context });
+export function logWarning(message: string, context?: Record<string, unknown>): void {
+  logError(message, { severity: 'warning', context });
 }
 
 /**
@@ -117,6 +116,6 @@ export function logWarning(message: string, context?: Record<string, unknown>): 
 export function logCritical(
   message: string,
   options: { context?: Record<string, unknown>; error?: Error | unknown } = {}
-): Promise<void> {
-  return logError(message, { ...options, severity: 'critical' });
+): void {
+  logError(message, { ...options, severity: 'critical' });
 }

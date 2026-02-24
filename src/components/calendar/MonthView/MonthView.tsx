@@ -31,9 +31,7 @@ export function MonthView() {
   const { filteredTasks } = useFilteredTasks();
   const { getEffectiveStatus } = useTasks();
 
-  // Memoize today's date to avoid creating new Date objects for every calendar cell
-  // This is only recalculated when the component re-renders (typically on user interaction)
-  const today = useMemo(() => new Date(), []);
+  const today = new Date();
 
   // Generate array of days for the calendar grid (includes padding days from adjacent months)
   const calendarDays = useMemo(() => {
@@ -136,9 +134,9 @@ export function MonthView() {
                       key={task.id}
                       className={taskClasses}
                       style={{
-                        backgroundColor: category.backgroundColor,
-                        borderLeftColor: category.primaryColor,
-                      }}
+                        '--task-bg': category.backgroundColor,
+                        '--task-border': category.primaryColor,
+                      } as React.CSSProperties}
                       onClick={(e) => handleTaskClick(e, task.id)}
                       onKeyDown={(e) => handleTaskKeyDown(e, task.id)}
                       role="button"

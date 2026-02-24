@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import type { SelectHTMLAttributes } from 'react';
 import styles from './Select.module.css';
 
@@ -15,11 +15,15 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, options, placeholder, className = '', ...props }, ref) => {
+    const generatedId = useId();
+    const selectId = props.id || generatedId;
+
     return (
       <div className={styles.selectWrapper}>
-        {label && <label className={styles.label}>{label}</label>}
+        {label && <label className={styles.label} htmlFor={selectId}>{label}</label>}
         <select
           ref={ref}
+          id={selectId}
           className={`${styles.select} ${className}`}
           {...props}
         >

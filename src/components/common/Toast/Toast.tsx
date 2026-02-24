@@ -31,7 +31,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
 
   return (
     <div
-      className={`${styles.toast} ${styles[toast.type]}`}
+      className={`${styles.toast} ${styles[toast.type]}${toast.exiting ? ` ${styles.exiting}` : ''}`}
       role="alert"
       aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
       aria-atomic="true"

@@ -22,7 +22,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     status: 'planning',
     category: 'seed-pro',
     priority: 'high',
-    assigneeId: 'kyle',
+    assigneeId: null,
     dueDate: getDueDate(7),
     completedAt: null,
     order: 0,
@@ -33,7 +33,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     status: 'in-progress',
     category: 'agronomy',
     priority: 'urgent',
-    assigneeId: 'austin',
+    assigneeId: null,
     dueDate: getDueDate(3),
     completedAt: null,
     order: 0,
@@ -44,7 +44,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     status: 'completed',
     category: 'sales',
     priority: 'medium',
-    assigneeId: 'ryan',
+    assigneeId: null,
     dueDate: getDueDate(-2),
     completedAt: new Date().toISOString(),
     order: 0,
@@ -55,7 +55,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     status: 'in-progress',
     category: 'testing',
     priority: 'high',
-    assigneeId: 'john',
+    assigneeId: null,
     dueDate: getDueDate(5),
     completedAt: null,
     order: 1,
@@ -66,7 +66,7 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
     status: 'planning',
     category: 'samples',
     priority: 'urgent',
-    assigneeId: 'kyle',
+    assigneeId: null,
     dueDate: getDueDate(-1), // Past due!
     completedAt: null,
     order: 1,
@@ -84,6 +84,12 @@ export const sampleTasks: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>[] = [
   },
 ];
 
+/**
+ * Returns demo tasks with generated IDs and timestamps.
+ * All assigneeId values are null to avoid foreign key constraint violations
+ * against the team_members table. Callers should assign real team member IDs
+ * if needed.
+ */
 export function createSampleTasks(): Task[] {
   const now = new Date().toISOString();
   return sampleTasks.map(task => ({
