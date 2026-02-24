@@ -15,10 +15,10 @@ export function StatusFilter() {
             <button
               key={status.id}
               className={`${styles.chip} ${isSelected ? styles.selected : ''}`}
-              style={{
-                backgroundColor: isSelected ? status.backgroundColor : 'var(--color-white)',
-                borderColor: isSelected ? status.primaryColor : 'var(--nb-border-color)',
-              }}
+              style={isSelected ? {
+                backgroundColor: status.backgroundColor,
+                borderColor: status.primaryColor,
+              } : undefined}
               onClick={() => toggleStatus(status.id)}
               aria-pressed={isSelected}
             >

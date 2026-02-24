@@ -17,8 +17,8 @@ export function CategoryFilter() {
               className={`${styles.chip} ${isSelected ? styles.selected : ''}`}
               style={{
                 borderColor: category.primaryColor,
-                backgroundColor: isSelected ? category.backgroundColor : 'var(--color-white)',
                 color: category.borderColor,
+                ...(isSelected ? { backgroundColor: category.backgroundColor } : {}),
               }}
               onClick={() => toggleCategory(category.id)}
               aria-pressed={isSelected}

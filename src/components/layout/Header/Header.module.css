@@ -53,6 +53,7 @@
 
 .viewButton {
   background: var(--color-white);
+  color: var(--color-black);
   border: var(--nb-border);
   border-radius: var(--nb-radius);
   padding: var(--space-sm) var(--space-md);
@@ -63,6 +64,10 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--nb-shadow);
+}
+
+[data-theme="dark"] .viewButton {
+  background: var(--color-gray-200);
 }
 
 .viewButton:hover {

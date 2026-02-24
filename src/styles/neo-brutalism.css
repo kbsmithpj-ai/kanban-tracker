@@ -121,7 +121,7 @@
   --brand-gold-dark: #d0a000;
 
   /* Core Design Values - Adjusted for dark mode */
-  --nb-border-color: var(--color-gray-300);
+  --nb-border-color: var(--color-gray-400);
   --nb-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
   --nb-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
 
@@ -167,11 +167,11 @@
   --color-status-urgent: var(--color-past-due);
 
   /* Neutral Colors - Inverted for dark mode */
-  --color-white: #1a1b23;
-  --color-off-white: #141520;
-  --color-gray-100: #1f2029;
-  --color-gray-200: #2a2b36;
-  --color-gray-300: #3a3b48;
+  --color-white: #1c1d27;
+  --color-off-white: #111218;
+  --color-gray-100: #252630;
+  --color-gray-200: #2e2f3a;
+  --color-gray-300: #3e3f4c;
   --color-gray-400: #6b6d80;
   --color-gray-500: #8b8d9e;
   --color-gray-600: #a8aab8;

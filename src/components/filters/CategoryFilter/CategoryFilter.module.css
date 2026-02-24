@@ -29,9 +29,14 @@
   font-weight: 600;
   font-size: 0.75rem;
   text-transform: uppercase;
+  color: var(--color-black);
   cursor: pointer;
   transition: all var(--transition-fast);
   background: var(--color-white);
+}
+
+[data-theme="dark"] .chip {
+  background: var(--color-gray-200);
 }
 
 .chip.selected {
