@@ -62,12 +62,11 @@
   text-transform: uppercase;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 2px 2px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow);
 }
 
 .viewButton:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow-hover);
 }
 
 .viewButton:focus-visible {
@@ -98,14 +97,13 @@
   border-radius: var(--nb-radius);
   font-size: 1.25rem;
   cursor: pointer;
-  box-shadow: 2px 2px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow);
   transition: all var(--transition-fast);
 }
 
 .themeToggle:hover {
   background: var(--color-gray-100);
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow-hover);
 }
 
 .themeToggle:focus-visible {
@@ -133,7 +131,6 @@
 
 .inviteButton:hover {
   background: var(--brand-cyan-light);
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 
@@ -162,7 +159,6 @@
 
 .errorLogsButton:hover {
   background: var(--color-past-due);
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 
@@ -190,7 +186,6 @@
 }
 
 .addButton:hover {
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 

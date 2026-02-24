@@ -60,18 +60,16 @@
   background: var(--brand-navy);
   color: var(--color-white);
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: box-shadow 0.1s ease;
   box-shadow: var(--nb-shadow);
 }
 
 .refreshButton:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--brand-navy);
+  box-shadow: var(--nb-shadow-hover);
 }
 
 .refreshButton:active:not(:disabled) {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0 var(--brand-navy);
+  box-shadow: var(--nb-shadow);
 }
 
 .refreshButton:disabled {
@@ -88,7 +86,7 @@
 .errorMessage {
   padding: var(--space-md);
   background: var(--color-past-due-bg);
-  border: 2px solid var(--color-status-urgent);
+  border: 1px solid var(--color-status-urgent);
   border-radius: var(--nb-radius);
   color: var(--color-status-urgent);
   font-family: var(--font-primary);
@@ -154,7 +152,7 @@
   display: inline-flex;
   align-items: center;
   padding: 2px var(--space-sm);
-  border: 2px solid;
+  border: 1px solid;
   border-radius: 4px;
   font-family: var(--font-primary);
   font-weight: 700;
@@ -282,18 +280,16 @@
   background: var(--color-gray-200);
   color: var(--brand-navy);
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: box-shadow 0.1s ease;
   box-shadow: var(--nb-shadow);
 }
 
 .closeButton:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--brand-navy);
+  box-shadow: var(--nb-shadow-hover);
 }
 
 .closeButton:active {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0 var(--brand-navy);
+  box-shadow: var(--nb-shadow);
 }
 
 .closeButton:focus-visible {

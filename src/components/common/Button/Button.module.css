@@ -19,13 +19,11 @@
 }
 
 .button:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 
 .button:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow);
 }
 
 .button:disabled {

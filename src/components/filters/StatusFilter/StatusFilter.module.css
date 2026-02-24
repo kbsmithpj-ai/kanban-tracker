@@ -23,7 +23,7 @@
   display: inline-flex;
   align-items: center;
   padding: var(--space-xs) var(--space-sm);
-  border: 2px solid var(--nb-border-color);
+  border: 1px solid var(--nb-border-color);
   border-radius: var(--nb-radius);
   font-family: var(--font-primary);
   font-weight: 600;
@@ -34,10 +34,6 @@
   background: var(--color-white);
 }
 
-.chip:hover {
-  transform: translateY(-1px);
-}
-
 .chip.selected {
-  box-shadow: 2px 2px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow);
 }

@@ -21,7 +21,7 @@
   border-radius: var(--nb-radius);
   background: var(--color-white);
   color: var(--color-black);
-  box-shadow: 2px 2px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow);
   transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 

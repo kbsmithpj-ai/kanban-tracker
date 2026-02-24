@@ -33,7 +33,6 @@
 }
 
 .toggleButton:hover {
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 

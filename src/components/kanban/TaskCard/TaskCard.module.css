@@ -4,12 +4,11 @@
   border-radius: var(--nb-radius);
   padding: var(--space-md);
   cursor: grab;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: box-shadow var(--transition-fast);
   box-shadow: var(--nb-shadow);
 }
 
 .taskCard:hover {
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 

@@ -84,17 +84,16 @@
 
 .taskCard {
   background: var(--color-white);
-  border: 2px solid var(--nb-border-color);
+  border: 1px solid var(--nb-border-color);
   border-radius: var(--nb-radius);
   padding: var(--space-sm);
   cursor: pointer;
-  box-shadow: 2px 2px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow);
   transition: all var(--transition-fast);
 }
 
 .taskCard:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow-hover);
 }
 
 .taskCard:focus-visible {
@@ -119,7 +118,7 @@
 
 .completedTask {
   border-color: var(--color-completed);
-  box-shadow: 2px 2px 0 var(--color-completed);
+  box-shadow: 0 1px 3px var(--color-completed);
   background: var(--color-completed-bg);
 }
 

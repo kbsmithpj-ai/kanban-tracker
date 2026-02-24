@@ -8,7 +8,7 @@
   font-weight: 700;
   text-transform: uppercase;
   color: var(--color-white);
-  box-shadow: 2px 2px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow);
 }
 
 .small {

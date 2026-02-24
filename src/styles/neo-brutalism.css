@@ -19,13 +19,13 @@
   --brand-gold-light: #ffc933;
   --brand-gold-dark: #c49400;
 
-  /* Core Neo-Brutalism Values */
-  --nb-border-width: 2px;
-  --nb-border-color: var(--color-gray-400);
+  /* Core Design Values */
+  --nb-border-width: 1px;
+  --nb-border-color: var(--color-gray-200);
   --nb-border: var(--nb-border-width) solid var(--nb-border-color);
-  --nb-shadow-offset: 3px;
-  --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 var(--color-gray-300);
-  --nb-shadow-hover: 4px 4px 0 var(--color-gray-300);
+  --nb-shadow-offset: 0;
+  --nb-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --nb-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
   --nb-radius: 8px;
 
   /* Typography */
@@ -120,10 +120,10 @@
   --brand-gold-light: #ffd040;
   --brand-gold-dark: #d0a000;
 
-  /* Core Neo-Brutalism Values - Adjusted for dark mode */
-  --nb-border-color: var(--color-gray-400);
-  --nb-shadow: var(--nb-shadow-offset) var(--nb-shadow-offset) 0 rgba(0, 0, 0, 0.6);
-  --nb-shadow-hover: 4px 4px 0 rgba(0, 0, 0, 0.7);
+  /* Core Design Values - Adjusted for dark mode */
+  --nb-border-color: var(--color-gray-300);
+  --nb-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --nb-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
 
   /* Category Colors - Darker muted backgrounds for dark mode */
   --color-seed-pro: #00b4f0;
@@ -167,17 +167,17 @@
   --color-status-urgent: var(--color-past-due);
 
   /* Neutral Colors - Inverted for dark mode */
-  --color-white: #1a1a2e;
-  --color-off-white: #14142a;
-  --color-gray-100: #1e1e38;
-  --color-gray-200: #282848;
-  --color-gray-300: #363660;
-  --color-gray-400: #8888b0;
-  --color-gray-500: #9898c0;
-  --color-gray-600: #b0b0d0;
-  --color-gray-700: #c8c8e0;
-  --color-gray-800: #e0e0f0;
-  --color-black: #e8e8f0;
+  --color-white: #1a1b23;
+  --color-off-white: #141520;
+  --color-gray-100: #1f2029;
+  --color-gray-200: #2a2b36;
+  --color-gray-300: #3a3b48;
+  --color-gray-400: #6b6d80;
+  --color-gray-500: #8b8d9e;
+  --color-gray-600: #a8aab8;
+  --color-gray-700: #c5c7d2;
+  --color-gray-800: #e0e1e8;
+  --color-black: #edeef2;
 
   /* Accent Colors - Brighter for dark mode visibility */
   --color-accent: #00b4f0;
@@ -198,17 +198,16 @@ body {
   line-height: 1.5;
 }
 
-/* Neo-Brutalism Utility Classes */
+/* Card Utility Classes */
 .nb-card {
   background: var(--color-white);
   border: var(--nb-border);
   border-radius: var(--nb-radius);
   box-shadow: var(--nb-shadow);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: box-shadow var(--transition-fast);
 }
 
 .nb-card:hover {
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 

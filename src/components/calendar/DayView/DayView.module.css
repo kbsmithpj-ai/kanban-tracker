@@ -23,7 +23,6 @@
 }
 
 .taskCard:hover {
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 
@@ -75,13 +74,13 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid var(--color-black);
+  border: 1px solid var(--color-black);
   flex-shrink: 0;
 }
 
 .completedTask {
   border-color: var(--color-completed);
-  box-shadow: 4px 4px 0 var(--color-completed);
+  box-shadow: 0 1px 3px var(--color-completed);
   background: var(--color-completed-bg);
 }
 
@@ -127,7 +126,6 @@
 }
 
 .addButton:hover {
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 

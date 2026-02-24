@@ -116,13 +116,11 @@
 }
 
 .button:hover {
-  transform: translate(-2px, -2px);
   box-shadow: var(--nb-shadow-hover);
 }
 
 .button:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 var(--nb-border-color);
+  box-shadow: var(--nb-shadow);
 }
 
 .button:focus-visible {
